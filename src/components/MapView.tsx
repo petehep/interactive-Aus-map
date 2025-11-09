@@ -37,6 +37,14 @@ export type Route = {
 
 type PropsWithRoute = Props & { route?: Route | null }
 
+type StartLocation = { lat: number; lon: number; name?: string }
+
+type PropsFull = PropsWithRoute & {
+  startLocation?: StartLocation
+  selectingStart?: boolean
+  onStartSelected?: (lat: number, lon: number, name?: string) => void
+}
+
 type BBox = { south: number; west: number; north: number; east: number; zoom: number }
 
 function BBoxWatcher({ onChange }: { onChange: (bbox: BBox) => void }) {
@@ -57,7 +65,16 @@ function BBoxWatcher({ onChange }: { onChange: (bbox: BBox) => void }) {
   return null
 }
 
-export default function MapView({ onAddPlace, selectedIds, route }: PropsWithRoute) {
+function StartSelector({ selectingStart, onStartSelected }: { selectingStart?: boolean; onStartSelected?: (lat:number, lon:number, name?:string)=>void }){
+  useMapEvents({
+    click: (ev) => {
+      if (selectingStart && onStartSelected) onStartSelected(ev.latlng.lat, ev.latlng.lng)
+    }
+  })
+  return null
+}
+
+export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
   const abortRef = useRef<AbortController | null>(null)
   const timerRef = useRef<number | null>(null)
@@ -168,6 +185,7 @@ export default function MapView({ onAddPlace, selectedIds, route }: PropsWithRou
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <BBoxWatcher onChange={onBBox} />
+  <StartSelector selectingStart={selectingStart} onStartSelected={onStartSelected} />
       <MarkerClusterGroup chunkedLoading>
         {places.map(p => (
           <Marker key={p.id} position={[p.lat, p.lon]}>
@@ -182,11 +200,24 @@ export default function MapView({ onAddPlace, selectedIds, route }: PropsWithRou
                 >
                   {selectedIds.has(p.id) ? 'Added' : 'Add to itinerary'}
                 </button>
+                {onStartSelected && (
+                  <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(p.lat, p.lon, p.name)}>Set as start</button>
+                )}
               </div>
             </Popup>
           </Marker>
         ))}
       </MarkerClusterGroup>
+      {startLocation && (
+        <Marker position={[startLocation.lat, startLocation.lon]}>
+          <Popup>
+            <div style={{ minWidth: 140 }}>
+              <div style={{ fontWeight: 600 }}>{startLocation.name || 'Start'}</div>
+              <div style={{ color: '#475569' }}>{startLocation.lat.toFixed(4)}, {startLocation.lon.toFixed(4)}</div>
+            </div>
+          </Popup>
+        </Marker>
+      )}
       {route && route.coordinates && (
         <>
           <Polyline positions={route.coordinates} pathOptions={{ color: 'dodgerblue', weight: 4, opacity: 0.85 }} />

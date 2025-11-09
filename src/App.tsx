@@ -7,10 +7,10 @@ export type ItineraryItem = Place & { addedAt: number }
 
 type RouteLeg = { distance: number; duration: number }
 type RouteResult = {
-  coordinates: LatLngTuple[]
+  coordinates: [number, number][]
   legs: RouteLeg[]
   orderedPlaceIds: string[]
-  waypoints: LatLngTuple[]
+  waypoints: [number, number][]
 } | null
 
 export default function App() {
@@ -28,14 +28,16 @@ export default function App() {
   }, [])
 
   const [route, setRoute] = useState<RouteResult>(null)
+  const [startLocation, setStartLocation] = useState<{ lat: number; lon: number; name?: string }>({ lat: -34.9285, lon: 138.6007, name: 'Adelaide' })
+  const [selectingStart, setSelectingStart] = useState(false)
 
   const updateRoute = useCallback(async () => {
     if (!itinerary.length) return
-    // Adelaide fixed start
-    const adelaide = { lat: -34.9285, lon: 138.6007 }
-    // Build coordinates string: start (Adelaide) then itinerary points
+    // Use selected start (default Adelaide)
+    const start = startLocation
+    // Build coordinates string: start then itinerary points
     const coords = [
-      `${adelaide.lon},${adelaide.lat}`,
+      `${start.lon},${start.lat}`,
       ...itinerary.map(i => `${i.lon},${i.lat}`)
     ].join(';')
 
@@ -47,7 +49,7 @@ export default function App() {
       if (!data.trips || !data.trips.length) throw new Error('No trip returned')
       const trip = data.trips[0]
       // trip.geometry is GeoJSON LineString with coords [lon, lat]
-      const coordinates: LatLngTuple[] = trip.geometry.coordinates.map((c: number[]) => [c[1], c[0]])
+  const coordinates: [number, number][] = trip.geometry.coordinates.map((c: number[]) => [c[1], c[0]] as [number, number])
       const legs: RouteLeg[] = trip.legs.map((l: any) => ({ distance: l.distance, duration: l.duration }))
 
       // Map OSRM waypoint/trip ordering back to itinerary IDs.
@@ -61,12 +63,12 @@ export default function App() {
       const orderedPlaceIds = tripIndexToInputIndex.slice(1).map((inputIdx: number) => itinerary[inputIdx - 1].id)
 
       // waypoint coords in trip order (each waypoint.location is [lon, lat])
-      const waypoints: LatLngTuple[] = tripIndexToInputIndex.map((inputIdx: number) => {
+      const waypoints: [number, number][] = tripIndexToInputIndex.map((inputIdx: number) => {
         const w = data.waypoints[inputIdx]
-        return [w.location[1], w.location[0]]
+        return [w.location[1], w.location[0]] as [number, number]
       })
 
-      setRoute({ coordinates, legs, orderedPlaceIds, waypoints })
+  setRoute({ coordinates, legs, orderedPlaceIds, waypoints })
     } catch (e) {
       console.error(e)
       alert('Could not compute route. See console for details.')
@@ -82,11 +84,28 @@ export default function App() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div>{summary}</div>
           <button className="button" onClick={updateRoute} disabled={itinerary.length === 0}>Update Route</button>
+          <button
+            className="button"
+            onClick={() => setSelectingStart((s) => !s)}
+            style={{ background: selectingStart ? '#f97316' : undefined }}
+          >
+            {selectingStart ? 'Click map to set start (esc to cancel)' : 'Select start'}
+          </button>
         </div>
       </header>
       <main className="main">
         <div className="mapPane">
-          <MapView onAddPlace={onAddPlace} selectedIds={new Set(itinerary.map(i => i.id))} route={route} />
+          <MapView
+            onAddPlace={onAddPlace}
+            selectedIds={new Set(itinerary.map(i => i.id))}
+            route={route}
+            startLocation={startLocation}
+            selectingStart={selectingStart}
+            onStartSelected={(lat, lon, name) => {
+              setStartLocation({ lat, lon, name })
+              setSelectingStart(false)
+            }}
+          />
         </div>
         <aside className="sidebar">
           <h2>Itinerary</h2>
