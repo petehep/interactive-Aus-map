@@ -30,9 +30,13 @@ export default function App() {
   const [route, setRoute] = useState<RouteResult>(null)
   const [startLocation, setStartLocation] = useState<{ lat: number; lon: number; name?: string }>({ lat: -34.9285, lon: 138.6007, name: 'Adelaide' })
   const [selectingStart, setSelectingStart] = useState(false)
+  const [isRouting, setIsRouting] = useState(false)
+  const [startQuery, setStartQuery] = useState('')
+  const [isGeocoding, setIsGeocoding] = useState(false)
 
   const updateRoute = useCallback(async () => {
     if (!itinerary.length) return
+    setIsRouting(true)
     // Use selected start (default Adelaide)
     const start = startLocation
     // Build coordinates string: start then itinerary points
@@ -72,10 +76,44 @@ export default function App() {
     } catch (e) {
       console.error(e)
       alert('Could not compute route. See console for details.')
+    } finally {
+      setIsRouting(false)
     }
   }, [itinerary])
 
+  const geocodeStart = useCallback(async () => {
+    const q = startQuery.trim()
+    if (!q) return
+    setIsGeocoding(true)
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&countrycodes=au`
+      const res = await fetch(url, { headers: { 'Accept-Language': 'en' } })
+      if (!res.ok) throw new Error(`Geocode ${res.status}`)
+      const data = await res.json()
+      if (!data || !data.length) {
+        alert('No results found for that place')
+        return
+      }
+      // pick the first reasonable result
+      const first = data[0]
+      const lat = parseFloat(first.lat)
+      const lon = parseFloat(first.lon)
+      const name = first.display_name
+      setStartLocation({ lat, lon, name })
+      setStartQuery('')
+      setSelectingStart(false)
+    } catch (e) {
+      console.error('Geocode error', e)
+      alert('Could not find location. Check console for details.')
+    } finally {
+      setIsGeocoding(false)
+    }
+  }, [startQuery])
+
   const summary = useMemo(() => `${itinerary.length} stop${itinerary.length === 1 ? '' : 's'}`,[itinerary.length])
+
+  // Show dev URL when in dev mode to help local testing
+  const devUrl = typeof window !== 'undefined' && (import.meta as any).env?.DEV ? window.location.origin : null
 
   return (
     <div className="app">
@@ -85,8 +123,32 @@ export default function App() {
           <div>
             {summary}
             <div style={{ fontSize: 12, color: '#475569' }}>Start: {startLocation?.name ?? `${startLocation.lat.toFixed(3)}, ${startLocation.lon.toFixed(3)}`}</div>
+            {devUrl && (
+              <div className="devUrl" style={{ fontSize: 12, color: '#0f172a', marginTop: 6 }}>
+                Dev: <a href={devUrl} target="_blank" rel="noreferrer">{devUrl}</a>
+              </div>
+            )}
           </div>
-          <button className="button" onClick={updateRoute} disabled={itinerary.length === 0}>Update Route</button>
+
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              className="startInput"
+              placeholder="Type start place (e.g. Adelaide)"
+              value={startQuery}
+              onChange={(e) => setStartQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') geocodeStart() }}
+              disabled={isGeocoding}
+              aria-label="Start place input"
+            />
+            <button className="button" onClick={geocodeStart} disabled={isGeocoding || !startQuery.trim()}>
+              {isGeocoding ? 'Searching…' : 'Set Start'}
+            </button>
+          </div>
+
+          <button className="button" onClick={updateRoute} disabled={isRouting || itinerary.length === 0}>
+            {isRouting ? 'Routing…' : 'Update Route'}
+          </button>
+          {isRouting && <span className="spinner" aria-hidden="true" />}
           <button
             className="button"
             onClick={() => setSelectingStart((s) => !s)}

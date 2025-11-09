@@ -69,3 +69,32 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
 /* Make sure popup content sits above tiles/overlays */
 .leaflet-container .leaflet-popup-pane { z-index: 650; }
 
+
+/* Spinner used while routing */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0,0,0,0.15);
+  border-top-color: rgba(0,0,0,0.6);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Start input style */
+.startInput {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  min-width: 220px;
+}
+
+.devUrl a { color: #0ea5e9; text-decoration: none }
+.devUrl a:hover { text-decoration: underline }
+
