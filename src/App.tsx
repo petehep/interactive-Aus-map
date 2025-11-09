@@ -82,7 +82,10 @@ export default function App() {
       <header className="header">
         <h1 style={{ fontSize: 18, margin: 0 }}>Australia Trip Scheduler</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <div>{summary}</div>
+          <div>
+            {summary}
+            <div style={{ fontSize: 12, color: '#475569' }}>Start: {startLocation?.name ?? `${startLocation.lat.toFixed(3)}, ${startLocation.lon.toFixed(3)}`}</div>
+          </div>
           <button className="button" onClick={updateRoute} disabled={itinerary.length === 0}>Update Route</button>
           <button
             className="button"
@@ -101,7 +104,8 @@ export default function App() {
             route={route}
             startLocation={startLocation}
             selectingStart={selectingStart}
-            onStartSelected={(lat, lon, name) => {
+            onStartSelected={(lat: number, lon: number, name?: string) => {
+              console.log('Start selected:', lat, lon, name)
               setStartLocation({ lat, lon, name })
               setSelectingStart(false)
             }}
