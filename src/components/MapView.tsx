@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polyline, CircleMarker, Tooltip } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -28,6 +28,15 @@ type Props = {
   selectedIds: Set<string>
 }
 
+export type Route = {
+  coordinates: [number, number][] // [lat, lon]
+  legs: { distance: number; duration: number }[]
+  orderedPlaceIds: string[]
+  waypoints: [number, number][]
+}
+
+type PropsWithRoute = Props & { route?: Route | null }
+
 type BBox = { south: number; west: number; north: number; east: number; zoom: number }
 
 function BBoxWatcher({ onChange }: { onChange: (bbox: BBox) => void }) {
@@ -48,7 +57,7 @@ function BBoxWatcher({ onChange }: { onChange: (bbox: BBox) => void }) {
   return null
 }
 
-export default function MapView({ onAddPlace, selectedIds }: Props) {
+export default function MapView({ onAddPlace, selectedIds, route }: PropsWithRoute) {
   const [places, setPlaces] = useState<Place[]>([])
   const abortRef = useRef<AbortController | null>(null)
   const timerRef = useRef<number | null>(null)
@@ -178,6 +187,31 @@ export default function MapView({ onAddPlace, selectedIds }: Props) {
           </Marker>
         ))}
       </MarkerClusterGroup>
+      {route && route.coordinates && (
+        <>
+          <Polyline positions={route.coordinates} pathOptions={{ color: 'dodgerblue', weight: 4, opacity: 0.85 }} />
+          {route.waypoints && route.legs && route.waypoints.map((wp, i) => {
+            if (i >= route.waypoints.length - 1) return null
+            const next = route.waypoints[i + 1]
+            const mid: [number, number] = [(wp[0] + next[0]) / 2, (wp[1] + next[1]) / 2]
+            const dur = route.legs[i].duration
+            const formatDuration = (s: number) => {
+              const mins = Math.round(s / 60)
+              if (mins < 60) return `${mins} min`
+              const h = Math.floor(mins / 60)
+              const m = mins % 60
+              return `${h}h ${m}m`
+            }
+            return (
+              <CircleMarker key={`seg-${i}`} center={mid} radius={8} pathOptions={{ color: '#fff', fillColor: 'dodgerblue', fillOpacity: 1 }}>
+                <Tooltip direction="top" offset={[0, -8]} permanent>
+                  {formatDuration(dur)}
+                </Tooltip>
+              </CircleMarker>
+            )
+          })}
+        </>
+      )}
     </MapContainer>
   )
 }
