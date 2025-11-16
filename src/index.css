@@ -138,7 +138,12 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
 }
 .geocodeItem:hover { background: #f1f5f9 }
 
-/* Green marker styling for campsites */
-.green-marker {
+/* Purple marker styling for free campsites */
+.purple-marker {
   filter: hue-rotate(90deg) saturate(1.8) brightness(1.1);
+}
+
+/* Green marker styling for paid campsites */
+.green-marker {
+  filter: hue-rotate(220deg) saturate(2.5) brightness(0.95);
 }

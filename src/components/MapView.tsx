@@ -92,13 +92,14 @@ function CenterOnStart({ startLocation }: { startLocation?: StartLocation }){
 export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
   const [campsites, setCampsites] = useState<Place[]>([])
+  const [paidCampsites, setPaidCampsites] = useState<Place[]>([])
   const abortRef = useRef<AbortController | null>(null)
   const timerRef = useRef<number | null>(null)
 
   // Australia approx center and zoom
   const center: [number, number] = useMemo(() => [-25.2744, 133.7751], [])
 
-  // Create green icon for campsites
+  // Create green icon for paid campsites (will add $$ via CSS)
   const greenIcon = useMemo(() => new L.Icon({
     iconRetinaUrl: marker2x,
     iconUrl: marker1x,
@@ -108,6 +109,18 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
     className: 'green-marker'
+  }), [])
+
+  // Create purple icon for free campsites
+  const purpleIcon = useMemo(() => new L.Icon({
+    iconRetinaUrl: marker2x,
+    iconUrl: marker1x,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: 'purple-marker'
   }), [])
 
   const fetchPlaces = async (bbox: BBox) => {
@@ -205,16 +218,16 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     // Only fetch campsites at closer zoom levels
     if (bbox.zoom < 8) {
       setCampsites([])
+      setPaidCampsites([])
       return
     }
     
     const bboxStr = `(${bbox.south},${bbox.west},${bbox.north},${bbox.east})`
-    // Query for free campsites (fee=no or no fee tag) and camp sites
+    // Query for both free and paid campsites
     const query = `[out:json][timeout:25];
       (
-        node["tourism"="camp_site"]["fee"="no"]${bboxStr};
-        node["tourism"="camp_site"][!"fee"]${bboxStr};
-        node["tourism"="caravan_site"]["fee"="no"]${bboxStr};
+        node["tourism"="camp_site"]${bboxStr};
+        node["tourism"="caravan_site"]${bboxStr};
       );
       out body;`
     
@@ -248,15 +261,28 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       
       if (!data) return
       
-      const sites: Place[] = []
+      const freeSites: Place[] = []
+      const paidSites: Place[] = []
+      
       for (const el of data.elements) {
         if (el.type !== 'node') continue
         const { lat, lon, tags } = el
         if (!lat || !lon || !tags) continue
         const name = tags.name || tags['alt_name'] || 'Campsite'
-        sites.push({ id: `campsite/${el.id}`, name, type: 'attraction', lat, lon })
+        const isFree = tags.fee === 'no'
+        
+        // Store as "node/123456" format for OSM URLs
+        const site = { id: `node/${el.id}`, name, type: 'attraction' as const, lat, lon }
+        
+        if (isFree) {
+          freeSites.push(site)
+        } else {
+          paidSites.push(site)
+        }
       }
-      setCampsites(sites)
+      
+      setCampsites(freeSites)
+      setPaidCampsites(paidSites)
     } catch (e) {
       if ((e as any).name === 'AbortError') return
       console.error('Campsite fetch error:', e)
@@ -304,11 +330,57 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       </MarkerClusterGroup>
       <MarkerClusterGroup chunkedLoading>
         {campsites.map(c => (
-          <Marker key={c.id} position={[c.lat, c.lon]} icon={greenIcon}>
+          <Marker key={c.id} position={[c.lat, c.lon]} icon={purpleIcon}>
             <Popup>
               <div style={{ minWidth: 180 }}>
                 <div style={{ fontWeight: 600 }}>🏕️ {c.name}</div>
-                <div style={{ color: '#475569', marginBottom: 8 }}>Free campsite · {c.lat.toFixed(3)}, {c.lon.toFixed(3)}</div>
+                <div style={{ color: '#475569', marginBottom: 8 }}>
+                  Free campsite · {c.lat.toFixed(3)}, {c.lon.toFixed(3)}
+                </div>
+                <div style={{ marginBottom: 8 }}>
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.name + ' campsite')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: '#2563eb' }}
+                  >
+                    View on Google Maps →
+                  </a>
+                </div>
+                <button
+                  className="button"
+                  onClick={() => onAddPlace(c)}
+                  disabled={selectedIds.has(c.id)}
+                >
+                  {selectedIds.has(c.id) ? 'Added' : 'Add to itinerary'}
+                </button>
+                {onStartSelected && (
+                  <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(c.lat, c.lon, c.name)}>Set as start</button>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MarkerClusterGroup>
+      <MarkerClusterGroup chunkedLoading>
+        {paidCampsites.map(c => (
+          <Marker key={c.id} position={[c.lat, c.lon]} icon={greenIcon}>
+            <Popup>
+              <div style={{ minWidth: 180 }}>
+                <div style={{ fontWeight: 600 }}>🏕️💰 {c.name}</div>
+                <div style={{ color: '#475569', marginBottom: 8 }}>
+                  Paid campsite · {c.lat.toFixed(3)}, {c.lon.toFixed(3)}
+                </div>
+                <div style={{ marginBottom: 8 }}>
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.name + ' campsite')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: '#2563eb' }}
+                  >
+                    View on Google Maps →
+                  </a>
+                </div>
                 <button
                   className="button"
                   onClick={() => onAddPlace(c)}
