@@ -138,3 +138,7 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
 }
 .geocodeItem:hover { background: #f1f5f9 }
 
+/* Red marker styling using CSS filter */
+.red-marker {
+  filter: hue-rotate(100deg) saturate(1.5) brightness(0.9);
+}

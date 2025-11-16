@@ -86,7 +86,11 @@ export default function App() {
         return [w.location[1], w.location[0]] as [number, number]
       })
 
-  setRoute({ coordinates, legs, orderedPlaceIds, waypoints })
+      setRoute({ coordinates, legs, orderedPlaceIds, waypoints })
+      
+      // Reorder itinerary to match the optimized route
+      const reorderedItinerary = orderedPlaceIds.map(id => itinerary.find(item => item.id === id)!).filter(Boolean)
+      setItinerary(reorderedItinerary)
     } catch (e) {
       console.error(e)
       alert('Could not compute route. See console for details.')
@@ -111,13 +115,36 @@ export default function App() {
     }
   }, [itinerary, startLocation, updateRoute])
 
-  const exportItinerary = useCallback(() => {
+  const exportItinerary = useCallback(async () => {
     const payload = { itinerary, startLocation }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const jsonString = JSON.stringify(payload, null, 2)
+    
+    // Try to use File System Access API for save dialog
+    if ('showSaveFilePicker' in window) {
+      try {
+        const handle = await (window as any).showSaveFilePicker({
+          suggestedName: `Big Lap .json`,
+          types: [{
+            description: 'JSON File',
+            accept: { 'application/json': ['.json'] }
+          }]
+        })
+        const writable = await handle.createWritable()
+        await writable.write(jsonString)
+        await writable.close()
+        return
+      } catch (e) {
+        // User cancelled or error - fall through to fallback
+        if ((e as Error).name === 'AbortError') return
+      }
+    }
+    
+    // Fallback for browsers without File System Access API
+    const blob = new Blob([jsonString], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `itinerary-${new Date().toISOString().replace(/[:.]/g, '-')}.json`
+    a.download = `Big Lap .json`
     document.body.appendChild(a)
     a.click()
     a.remove()
