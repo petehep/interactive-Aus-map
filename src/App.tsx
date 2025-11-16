@@ -376,7 +376,32 @@ export default function App() {
           />
         </div>
         <aside className="sidebar">
-          <h2>Itinerary</h2>
+          <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Itinerary</span>
+            {route && route.legs && route.legs.length > 0 && (
+              <span style={{ fontSize: 14, fontWeight: 'normal', color: '#475569' }}>
+                {(() => {
+                  const totalSeconds = route.legs.reduce((sum, leg) => sum + leg.duration, 0)
+                  const totalHours = totalSeconds / 3600
+                  
+                  if (totalHours >= 24) {
+                    const days = Math.floor(totalHours / 24)
+                    const hours = Math.floor(totalHours % 24)
+                    const minutes = Math.round((totalSeconds % 3600) / 60)
+                    return days > 0 && hours > 0 
+                      ? `${days}d ${hours}h ${minutes}m`
+                      : days > 0 
+                        ? `${days}d ${minutes}m`
+                        : `${hours}h ${minutes}m`
+                  }
+                  
+                  const hours = Math.floor(totalHours)
+                  const minutes = Math.round((totalSeconds % 3600) / 60)
+                  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+                })()}
+              </span>
+            )}
+          </h2>
           <div style={{ padding: 8, display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
             <button className="button" onClick={exportItinerary} disabled={itinerary.length === 0} title="Download itinerary as JSON">Save itinerary</button>
             <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>

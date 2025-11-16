@@ -91,11 +91,24 @@ function CenterOnStart({ startLocation }: { startLocation?: StartLocation }){
 
 export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
+  const [campsites, setCampsites] = useState<Place[]>([])
   const abortRef = useRef<AbortController | null>(null)
   const timerRef = useRef<number | null>(null)
 
   // Australia approx center and zoom
   const center: [number, number] = useMemo(() => [-25.2744, 133.7751], [])
+
+  // Create green icon for campsites
+  const greenIcon = useMemo(() => new L.Icon({
+    iconRetinaUrl: marker2x,
+    iconUrl: marker1x,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: 'green-marker'
+  }), [])
 
   const fetchPlaces = async (bbox: BBox) => {
     // Build bbox string for query
@@ -188,9 +201,74 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     }
   }
 
+  const fetchCampsites = async (bbox: BBox) => {
+    // Only fetch campsites at closer zoom levels
+    if (bbox.zoom < 8) {
+      setCampsites([])
+      return
+    }
+    
+    const bboxStr = `(${bbox.south},${bbox.west},${bbox.north},${bbox.east})`
+    // Query for free campsites (fee=no or no fee tag) and camp sites
+    const query = `[out:json][timeout:25];
+      (
+        node["tourism"="camp_site"]["fee"="no"]${bboxStr};
+        node["tourism"="camp_site"][!"fee"]${bboxStr};
+        node["tourism"="caravan_site"]["fee"="no"]${bboxStr};
+      );
+      out body;`
+    
+    const controller = new AbortController()
+    if (abortRef.current) abortRef.current.abort()
+    abortRef.current = controller
+    
+    try {
+      const endpoints = [
+        'https://overpass-api.de/api/interpreter',
+        'https://lz4.overpass-api.de/api/interpreter',
+        'https://overpass.kumi.systems/api/interpreter'
+      ]
+      let data: { elements: any[] } | null = null
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            body: query,
+            headers: { 'Content-Type': 'text/plain' },
+            signal: controller.signal,
+          })
+          if (!res.ok) throw new Error(`Overpass error: ${res.status}`)
+          data = await res.json() as { elements: any[] }
+          break
+        } catch (err) {
+          if ((err as any).name === 'AbortError') return
+          continue
+        }
+      }
+      
+      if (!data) return
+      
+      const sites: Place[] = []
+      for (const el of data.elements) {
+        if (el.type !== 'node') continue
+        const { lat, lon, tags } = el
+        if (!lat || !lon || !tags) continue
+        const name = tags.name || tags['alt_name'] || 'Campsite'
+        sites.push({ id: `campsite/${el.id}`, name, type: 'attraction', lat, lon })
+      }
+      setCampsites(sites)
+    } catch (e) {
+      if ((e as any).name === 'AbortError') return
+      console.error('Campsite fetch error:', e)
+    }
+  }
+
   const onBBox = (bbox: BBox) => {
     if (timerRef.current) window.clearTimeout(timerRef.current)
-    timerRef.current = window.setTimeout(() => fetchPlaces(bbox), 400)
+    timerRef.current = window.setTimeout(() => {
+      fetchPlaces(bbox)
+      fetchCampsites(bbox)
+    }, 400)
   }
 
   return (
@@ -218,6 +296,28 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                 </button>
                 {onStartSelected && (
                   <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(p.lat, p.lon, p.name)}>Set as start</button>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MarkerClusterGroup>
+      <MarkerClusterGroup chunkedLoading>
+        {campsites.map(c => (
+          <Marker key={c.id} position={[c.lat, c.lon]} icon={greenIcon}>
+            <Popup>
+              <div style={{ minWidth: 180 }}>
+                <div style={{ fontWeight: 600 }}>🏕️ {c.name}</div>
+                <div style={{ color: '#475569', marginBottom: 8 }}>Free campsite · {c.lat.toFixed(3)}, {c.lon.toFixed(3)}</div>
+                <button
+                  className="button"
+                  onClick={() => onAddPlace(c)}
+                  disabled={selectedIds.has(c.id)}
+                >
+                  {selectedIds.has(c.id) ? 'Added' : 'Add to itinerary'}
+                </button>
+                {onStartSelected && (
+                  <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(c.lat, c.lon, c.name)}>Set as start</button>
                 )}
               </div>
             </Popup>
