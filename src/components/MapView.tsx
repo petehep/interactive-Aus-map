@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polyline, CircleMarker, Tooltip } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap, Polyline, CircleMarker, Tooltip } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -71,6 +71,21 @@ function StartSelector({ selectingStart, onStartSelected }: { selectingStart?: b
       if (selectingStart && onStartSelected) onStartSelected(ev.latlng.lat, ev.latlng.lng)
     }
   })
+  return null
+}
+
+function CenterOnStart({ startLocation }: { startLocation?: StartLocation }){
+  const map = useMap()
+  React.useEffect(() => {
+    if (!startLocation) return
+    try {
+      const currentZoom = map.getZoom()
+      const targetZoom = Math.max(currentZoom, 12)
+      map.flyTo([startLocation.lat, startLocation.lon], targetZoom, { duration: 0.8 })
+    } catch (e) {
+      // ignore
+    }
+  }, [startLocation])
   return null
 }
 
@@ -186,6 +201,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       />
       <BBoxWatcher onChange={onBBox} />
   <StartSelector selectingStart={selectingStart} onStartSelected={onStartSelected} />
+    <CenterOnStart startLocation={startLocation} />
       <MarkerClusterGroup chunkedLoading>
         {places.map(p => (
           <Marker key={p.id} position={[p.lat, p.lon]}>

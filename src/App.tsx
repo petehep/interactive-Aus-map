@@ -13,6 +13,13 @@ type RouteResult = {
   waypoints: [number, number][]
 } | null
 
+type GeoResult = {
+  lat: number
+  lon: number
+  name: string
+  raw: any
+}
+
 export default function App() {
   const [itinerary, setItinerary] = useState<ItineraryItem[]>([])
 
@@ -28,14 +35,21 @@ export default function App() {
   }, [])
 
   const [route, setRoute] = useState<RouteResult>(null)
-  const [startLocation, setStartLocation] = useState<{ lat: number; lon: number; name?: string }>({ lat: -34.9285, lon: 138.6007, name: 'Adelaide' })
+  const [startLocation, setStartLocation] = useState<{ lat: number; lon: number; name?: string } | undefined>(undefined)
   const [selectingStart, setSelectingStart] = useState(false)
   const [isRouting, setIsRouting] = useState(false)
   const [startQuery, setStartQuery] = useState('')
   const [isGeocoding, setIsGeocoding] = useState(false)
+  const [geocodeResults, setGeocodeResults] = useState<GeoResult[] | null>(null)
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null)
+  const shouldAutoRouteRef = React.useRef(false)
 
   const updateRoute = useCallback(async () => {
     if (!itinerary.length) return
+    if (!startLocation) {
+      alert('Please select a start location first (type or pick on the map).')
+      return
+    }
     setIsRouting(true)
     // Use selected start (default Adelaide)
     const start = startLocation
@@ -81,27 +95,158 @@ export default function App() {
     }
   }, [itinerary])
 
+  const clearItinerary = useCallback(() => {
+    if (!itinerary.length) return
+    // confirm destructive action
+    if (!window.confirm('Clear all itinerary stops? This cannot be undone.')) return
+    setItinerary([])
+    setRoute(null)
+  }, [itinerary])
+
+  // Auto-compute route after loading itinerary from file
+  React.useEffect(() => {
+    if (shouldAutoRouteRef.current && itinerary.length > 0 && startLocation) {
+      shouldAutoRouteRef.current = false
+      updateRoute()
+    }
+  }, [itinerary, startLocation, updateRoute])
+
+  const exportItinerary = useCallback(() => {
+    const payload = { itinerary, startLocation }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `itinerary-${new Date().toISOString().replace(/[:.]/g, '-')}.json`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 5000)
+  }, [itinerary, startLocation])
+
+  const importItineraryFromFile = useCallback(async (file?: File) => {
+    try {
+      if (!file) return
+      const text = await file.text()
+      const data = JSON.parse(text)
+      if (!data || !Array.isArray(data.itinerary)) {
+        alert('Invalid itinerary file')
+        return
+      }
+      if (!window.confirm('Load itinerary from file? This will replace your current stops.')) return
+      // Basic validation and mapping
+      const items: ItineraryItem[] = data.itinerary.map((x: any) => ({
+        id: x.id,
+        name: x.name,
+        type: x.type,
+        lat: x.lat,
+        lon: x.lon,
+        addedAt: x.addedAt || Date.now()
+      }))
+      setItinerary(items)
+      if (data.startLocation && data.startLocation.lat && data.startLocation.lon) {
+        setStartLocation({ lat: data.startLocation.lat, lon: data.startLocation.lon, name: data.startLocation.name })
+      }
+      setRoute(null)
+      // Set flag to trigger auto-route after state updates
+      if (items.length > 0 && data.startLocation) {
+        shouldAutoRouteRef.current = true
+      }
+    } catch (e) {
+      console.error('Import error', e)
+      alert('Could not import itinerary — invalid file')
+    }
+  }, [updateRoute])
+
+  const onFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files && e.target.files[0]
+    if (!f) return
+    importItineraryFromFile(f)
+    // reset input
+    e.currentTarget.value = ''
+  }, [importItineraryFromFile])
+
+  // Export the current route as a GPX track and trigger download
+  const exportGPX = useCallback(() => {
+    if (!route) return
+    const now = new Date().toISOString()
+    const header = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="aus-trip-scheduler">\n  <metadata>\n    <time>${now}</time>\n  </metadata>\n  <trk>\n    <name>Planned route</name>\n    <trkseg>\n`
+    const pts = route.coordinates.map(([lat, lon]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>\n`).join('')
+    const footer = `    </trkseg>\n  </trk>\n</gpx>`
+    const gpx = header + pts + footer
+    const blob = new Blob([gpx], { type: 'application/gpx+xml' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `route-${new Date().toISOString().replace(/[:.]/g, '-')}.gpx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 5000)
+  }, [route])
+
+  // Open the route in Google Maps Directions using the waypoints in trip order.
+  const openInGoogleMaps = useCallback(() => {
+    if (!route) return
+    // Google Maps supports a reasonable number of path segments; limit to 25 to be safe
+    const maxPoints = 25
+    const coords = (route.waypoints || []).slice(0, maxPoints).map(([lat, lon]) => `${lat},${lon}`)
+    if (!coords.length) return
+    const url = `https://www.google.com/maps/dir/${coords.join('/')}`
+    window.open(url, '_blank')
+  }, [route])
+
   const geocodeStart = useCallback(async () => {
     const q = startQuery.trim()
     if (!q) return
     setIsGeocoding(true)
     try {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&countrycodes=au`
-      const res = await fetch(url, { headers: { 'Accept-Language': 'en' } })
-      if (!res.ok) throw new Error(`Geocode ${res.status}`)
-      const data = await res.json()
-      if (!data || !data.length) {
+      const baseUrl = (qq: string) => `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(qq)}&limit=8&countrycodes=au&addressdetails=1`
+      const doFetch = async (qq: string) => {
+        const res = await fetch(baseUrl(qq), { headers: { 'Accept-Language': 'en' } })
+        if (!res.ok) throw new Error(`Geocode ${res.status}`)
+        return await res.json()
+      }
+
+      const orig = await doFetch(q)
+
+      // If the query already mentions South Australia, no need for separate SA fetch
+      let sa: any[] | null = null
+      if (!q.toLowerCase().includes('south') && !q.toLowerCase().includes('sa')) {
+        try {
+          sa = await doFetch(`${q} South Australia`)
+        } catch (e) {
+          sa = null
+        }
+      }
+
+      // Merge SA results first (if any), then other original results, dedup by osm_id
+      const combined: any[] = []
+      const seen = new Set<number>()
+      if (sa && sa.length) {
+        for (const d of sa) {
+          if (!seen.has(d.osm_id)) {
+            combined.push(d)
+            seen.add(d.osm_id)
+          }
+        }
+      }
+      if (orig && orig.length) {
+        for (const d of orig) {
+          if (!seen.has(d.osm_id)) {
+            combined.push(d)
+            seen.add(d.osm_id)
+          }
+        }
+      }
+
+      if (!combined.length) {
         alert('No results found for that place')
         return
       }
-      // pick the first reasonable result
-      const first = data[0]
-      const lat = parseFloat(first.lat)
-      const lon = parseFloat(first.lon)
-      const name = first.display_name
-      setStartLocation({ lat, lon, name })
-      setStartQuery('')
-      setSelectingStart(false)
+
+      setGeocodeResults(combined.map((d: any) => ({ lat: parseFloat(d.lat), lon: parseFloat(d.lon), name: d.display_name, raw: d })))
+      // don't clear the query yet — let user pick
     } catch (e) {
       console.error('Geocode error', e)
       alert('Could not find location. Check console for details.')
@@ -109,6 +254,13 @@ export default function App() {
       setIsGeocoding(false)
     }
   }, [startQuery])
+
+  const pickGeocode = useCallback((r: any) => {
+    setStartLocation({ lat: r.lat, lon: r.lon, name: r.name })
+    setStartQuery('')
+    setGeocodeResults(null)
+    setSelectingStart(false)
+  }, [])
 
   const summary = useMemo(() => `${itinerary.length} stop${itinerary.length === 1 ? '' : 's'}`,[itinerary.length])
 
@@ -122,7 +274,9 @@ export default function App() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div>
             {summary}
-            <div style={{ fontSize: 12, color: '#475569' }}>Start: {startLocation?.name ?? `${startLocation.lat.toFixed(3)}, ${startLocation.lon.toFixed(3)}`}</div>
+            <div style={{ fontSize: 12, color: '#475569' }}>
+              Start: {startLocation ? (startLocation.name ?? `${startLocation.lat.toFixed(3)}, ${startLocation.lon.toFixed(3)}`) : 'None'}
+            </div>
             {devUrl && (
               <div className="devUrl" style={{ fontSize: 12, color: '#0f172a', marginTop: 6 }}>
                 Dev: <a href={devUrl} target="_blank" rel="noreferrer">{devUrl}</a>
@@ -130,7 +284,7 @@ export default function App() {
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ position: 'relative', display: 'flex', gap: 8, alignItems: 'center' }}>
             <input
               className="startInput"
               placeholder="Type start place (e.g. Adelaide)"
@@ -143,12 +297,33 @@ export default function App() {
             <button className="button" onClick={geocodeStart} disabled={isGeocoding || !startQuery.trim()}>
               {isGeocoding ? 'Searching…' : 'Set Start'}
             </button>
+                  <div style={{ position: 'relative' }}>
+                    {geocodeResults && (
+                      <div className="geocodePickOverlay">
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: 6 }}>
+                          <button className="button small" onClick={() => setGeocodeResults(null)}>Cancel</button>
+                        </div>
+                        {geocodeResults.map((r: any, i: number) => (
+                          <button key={i} className="geocodeItem" onClick={() => pickGeocode(r)}>
+                            <div style={{ fontSize: 13 }}>{r.name}</div>
+                            <div style={{ fontSize: 11, color: '#64748b' }}>{r.lat.toFixed(4)}, {r.lon.toFixed(4)}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
           </div>
 
           <button className="button" onClick={updateRoute} disabled={isRouting || itinerary.length === 0}>
             {isRouting ? 'Routing…' : 'Update Route'}
           </button>
           {isRouting && <span className="spinner" aria-hidden="true" />}
+          <button className="button" onClick={exportGPX} disabled={!route} title="Download route as GPX">
+            Export GPX
+          </button>
+          <button className="button" onClick={openInGoogleMaps} disabled={!route} title="Open route in Google Maps">
+            Open in Google Maps
+          </button>
           <button
             className="button"
             onClick={() => setSelectingStart((s) => !s)}
@@ -175,6 +350,12 @@ export default function App() {
         </div>
         <aside className="sidebar">
           <h2>Itinerary</h2>
+          <div style={{ padding: 8, display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
+            <button className="button" onClick={exportItinerary} disabled={itinerary.length === 0} title="Download itinerary as JSON">Save itinerary</button>
+            <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>
+            <input ref={fileInputRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={onFileChange} />
+            <button className="button" onClick={clearItinerary} disabled={itinerary.length === 0} title="Remove all stops from itinerary">Clear itinerary</button>
+          </div>
           <Itinerary items={itinerary} onRemove={onRemove} />
         </aside>
       </main>
