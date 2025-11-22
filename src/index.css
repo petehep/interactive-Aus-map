@@ -157,3 +157,120 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
 .blue-marker {
   filter: hue-rotate(180deg) saturate(2.0) brightness(1.0);
 }
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .header h1 {
+    font-size: 16px !important;
+  }
+
+  .header > div {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .startInput {
+    min-width: 100%;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .sidebar {
+    border-left: none;
+    border-top: 2px solid #e2e8f0;
+    max-height: 40vh;
+    min-width: 100%;
+    order: 2;
+  }
+
+  .mapPane {
+    order: 1;
+    height: 60vh;
+  }
+
+  .sidebar h2 {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .itineraryList {
+    max-height: 25vh;
+  }
+
+  .itineraryItem {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .button {
+    padding: 10px 14px;
+    font-size: 14px;
+    min-height: 44px; /* iOS touch target */
+    white-space: nowrap;
+  }
+
+  .button.small {
+    padding: 8px 12px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  .geocodePickOverlay {
+    width: calc(100vw - 16px);
+    max-width: 420px;
+    left: 8px;
+    right: 8px;
+  }
+
+  /* Make sidebar buttons wrap and stack better on mobile */
+  .sidebar > div {
+    flex-wrap: wrap;
+    gap: 6px !important;
+  }
+
+  .sidebar > div button {
+    flex: 1 1 auto;
+    min-width: calc(50% - 3px);
+  }
+
+  /* Larger tap targets for map popups */
+  .leaflet-popup-content {
+    font-size: 14px;
+    min-width: 200px !important;
+  }
+
+  .leaflet-popup-content .button {
+    width: 100%;
+    margin-left: 0 !important;
+    margin-top: 8px;
+  }
+
+  /* Stack buttons in popups */
+  .leaflet-popup-content > div > button:last-of-type {
+    margin-top: 8px;
+  }
+}
+
+/* Better PC experience - slightly wider sidebar */
+@media (min-width: 1400px) {
+  .main {
+    grid-template-columns: 1fr 420px;
+  }
+  
+  .sidebar {
+    min-width: 380px;
+  }
+}
