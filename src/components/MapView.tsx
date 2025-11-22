@@ -487,19 +487,12 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       // Keep attractions regardless of population
       if (p.type === 'attraction') return true
       
-      // If population data exists, use it
+      // If population data exists, use it (between 500 and 10,000)
       if (p.population !== undefined && !isNaN(p.population)) {
-        return p.population <= 10000
+        return p.population >= 500 && p.population <= 10000
       }
       
-      // If no population data, use type-based filtering
-      // Include: villages, hamlets, localities (typically small)
-      // Include: towns (many small towns don't have population data)
-      // Exclude: cities (typically large)
-      if (p.type === 'village' || p.type === 'hamlet' || p.type === 'locality' || p.type === 'town') {
-        return true
-      }
-      
+      // If no population data, exclude it (too uncertain)
       return false
     })
   }, [places, showSmallTownsOnly])
