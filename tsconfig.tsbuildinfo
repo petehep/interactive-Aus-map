@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/itinerary.tsx","./src/components/mapview.tsx","./src/types/react-leaflet-cluster.d.ts"],"version":"5.9.3"}

@@ -147,3 +147,8 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
 .green-marker {
   filter: hue-rotate(220deg) saturate(2.5) brightness(0.95);
 }
+
+/* Orange marker styling for fuel stations */
+.orange-marker {
+  filter: hue-rotate(330deg) saturate(2.0) brightness(1.1);
+}

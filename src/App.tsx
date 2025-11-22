@@ -41,6 +41,7 @@ export default function App() {
   const [startQuery, setStartQuery] = useState('')
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [geocodeResults, setGeocodeResults] = useState<GeoResult[] | null>(null)
+  const [showFuelStations, setShowFuelStations] = useState(false)
   const fileInputRef = React.useRef<HTMLInputElement | null>(null)
   const shouldAutoRouteRef = React.useRef(false)
 
@@ -97,7 +98,7 @@ export default function App() {
     } finally {
       setIsRouting(false)
     }
-  }, [itinerary])
+  }, [itinerary, startLocation])
 
   const clearItinerary = useCallback(() => {
     if (!itinerary.length) return
@@ -289,6 +290,13 @@ export default function App() {
     setSelectingStart(false)
   }, [])
 
+  const clearStart = useCallback(() => {
+    setStartLocation(undefined)
+    setStartQuery('')
+    setGeocodeResults(null)
+    setRoute(null)
+  }, [])
+
   const summary = useMemo(() => `${itinerary.length} stop${itinerary.length === 1 ? '' : 's'}`,[itinerary.length])
 
   // Show dev URL when in dev mode to help local testing
@@ -324,6 +332,11 @@ export default function App() {
             <button className="button" onClick={geocodeStart} disabled={isGeocoding || !startQuery.trim()}>
               {isGeocoding ? 'Searching…' : 'Set Start'}
             </button>
+            {startLocation && (
+              <button className="button small" onClick={clearStart} title="Clear start location">
+                Clear start
+              </button>
+            )}
                   <div style={{ position: 'relative' }}>
                     {geocodeResults && (
                       <div className="geocodePickOverlay">
@@ -368,6 +381,8 @@ export default function App() {
             route={route}
             startLocation={startLocation}
             selectingStart={selectingStart}
+            showFuelStations={showFuelStations}
+            itinerary={itinerary}
             onStartSelected={(lat: number, lon: number, name?: string) => {
               console.log('Start selected:', lat, lon, name)
               setStartLocation({ lat, lon, name })
@@ -403,6 +418,14 @@ export default function App() {
             )}
           </h2>
           <div style={{ padding: 8, display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
+            <button 
+              className="button" 
+              onClick={() => setShowFuelStations(!showFuelStations)} 
+              title="Show fuel stations near itinerary stops"
+              style={{ backgroundColor: showFuelStations ? '#10b981' : undefined }}
+            >
+              {showFuelStations ? 'Hide Fuel' : 'Show Fuel'}
+            </button>
             <button className="button" onClick={exportItinerary} disabled={itinerary.length === 0} title="Download itinerary as JSON">Save itinerary</button>
             <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>
             <input ref={fileInputRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={onFileChange} />

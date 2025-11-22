@@ -43,6 +43,8 @@ type PropsFull = PropsWithRoute & {
   startLocation?: StartLocation
   selectingStart?: boolean
   onStartSelected?: (lat: number, lon: number, name?: string) => void
+  showFuelStations?: boolean
+  itinerary?: { id: string; name: string; lat: number; lon: number }[]
 }
 
 type BBox = { south: number; west: number; north: number; east: number; zoom: number }
@@ -89,10 +91,11 @@ function CenterOnStart({ startLocation }: { startLocation?: StartLocation }){
   return null
 }
 
-export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected }: PropsFull) {
+export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, itinerary }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
   const [campsites, setCampsites] = useState<Place[]>([])
   const [paidCampsites, setPaidCampsites] = useState<Place[]>([])
+  const [fuelStations, setFuelStations] = useState<Place[]>([])
   const abortRef = useRef<AbortController | null>(null)
   const timerRef = useRef<number | null>(null)
 
@@ -121,6 +124,18 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
     className: 'purple-marker'
+  }), [])
+
+  // Create orange icon for fuel stations
+  const orangeIcon = useMemo(() => new L.Icon({
+    iconRetinaUrl: marker2x,
+    iconUrl: marker1x,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: 'orange-marker'
   }), [])
 
   const fetchPlaces = async (bbox: BBox) => {
@@ -289,6 +304,72 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     }
   }
 
+  // Fetch fuel stations near itinerary stops
+  useEffect(() => {
+    if (!showFuelStations || !itinerary || itinerary.length === 0) {
+      setFuelStations([])
+      return
+    }
+
+    const fetchFuelStations = async () => {
+      const radius = 10000 // 10km radius around each stop
+      const allStations: Place[] = []
+      const seenIds = new Set<string>()
+
+      for (const stop of itinerary) {
+        const query = `[out:json][timeout:25];
+          (
+            node["amenity"="fuel"](around:${radius},${stop.lat},${stop.lon});
+          );
+          out body;`
+
+        try {
+          const endpoints = [
+            'https://overpass-api.de/api/interpreter',
+            'https://lz4.overpass-api.de/api/interpreter',
+            'https://overpass.kumi.systems/api/interpreter'
+          ]
+
+          let data: { elements: any[] } | null = null
+          for (const url of endpoints) {
+            try {
+              const res = await fetch(url, {
+                method: 'POST',
+                body: query,
+                headers: { 'Content-Type': 'text/plain' },
+              })
+              if (!res.ok) continue
+              data = await res.json() as { elements: any[] }
+              break
+            } catch (err) {
+              continue
+            }
+          }
+
+          if (!data) continue
+
+          for (const el of data.elements) {
+            if (el.type !== 'node') continue
+            const { lat, lon, tags, id } = el
+            if (!lat || !lon) continue
+            const stationId = `fuel/${id}`
+            if (seenIds.has(stationId)) continue
+            seenIds.add(stationId)
+
+            const name = tags?.name || tags?.brand || 'Fuel Station'
+            allStations.push({ id: stationId, name, type: 'attraction' as const, lat, lon })
+          }
+        } catch (e) {
+          console.error('Fuel station fetch error:', e)
+        }
+      }
+
+      setFuelStations(allStations)
+    }
+
+    fetchFuelStations()
+  }, [showFuelStations, itinerary])
+
   const onBBox = (bbox: BBox) => {
     if (timerRef.current) window.clearTimeout(timerRef.current)
     timerRef.current = window.setTimeout(() => {
@@ -306,29 +387,42 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       <BBoxWatcher onChange={onBBox} />
   <StartSelector selectingStart={selectingStart} onStartSelected={onStartSelected} />
     <CenterOnStart startLocation={startLocation} />
-      <MarkerClusterGroup chunkedLoading>
-        {places.map(p => (
-          <Marker key={p.id} position={[p.lat, p.lon]}>
-            <Popup>
-              <div style={{ minWidth: 180 }}>
-                <div style={{ fontWeight: 600 }}>{p.name}</div>
-                <div style={{ color: '#475569', marginBottom: 8 }}>{p.type} · {p.lat.toFixed(3)}, {p.lon.toFixed(3)}</div>
-                <button
-                  className="button"
-                  onClick={() => onAddPlace(p)}
-                  disabled={selectedIds.has(p.id)}
-                >
-                  {selectedIds.has(p.id) ? 'Added' : 'Add to itinerary'}
-                </button>
-                {onStartSelected && (
-                  <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(p.lat, p.lon, p.name)}>Set as start</button>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MarkerClusterGroup>
-      <MarkerClusterGroup chunkedLoading>
+      {!showFuelStations && (
+        <MarkerClusterGroup chunkedLoading>
+          {places.map(p => (
+            <Marker key={p.id} position={[p.lat, p.lon]}>
+              <Popup>
+                <div style={{ minWidth: 180 }}>
+                  <div style={{ fontWeight: 600 }}>{p.name}</div>
+                  <div style={{ color: '#475569', marginBottom: 8 }}>{p.type} · {p.lat.toFixed(3)}, {p.lon.toFixed(3)}</div>
+                  <div style={{ marginBottom: 8 }}>
+                    <a 
+                      href={`https://www.meteoblue.com/en/weather/forecast/week/${p.lat.toFixed(4)}N${p.lon.toFixed(4)}E`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: 12, color: '#2563eb' }}
+                    >
+                      Weather forecast →
+                    </a>
+                  </div>
+                  <button
+                    className="button"
+                    onClick={() => onAddPlace(p)}
+                    disabled={selectedIds.has(p.id)}
+                  >
+                    {selectedIds.has(p.id) ? 'Added' : 'Add to itinerary'}
+                  </button>
+                  {onStartSelected && (
+                    <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(p.lat, p.lon, p.name)}>Set as start</button>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+      )}
+      {!showFuelStations && (
+        <MarkerClusterGroup chunkedLoading>
         {campsites.map(c => (
           <Marker key={c.id} position={[c.lat, c.lon]} icon={purpleIcon}>
             <Popup>
@@ -337,7 +431,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                 <div style={{ color: '#475569', marginBottom: 8 }}>
                   Free campsite · {c.lat.toFixed(3)}, {c.lon.toFixed(3)}
                 </div>
-                <div style={{ marginBottom: 8 }}>
+                <div style={{ marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <a 
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.name + ' campsite')}`}
                     target="_blank"
@@ -345,6 +439,14 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                     style={{ fontSize: 12, color: '#2563eb' }}
                   >
                     View on Google Maps →
+                  </a>
+                  <a 
+                    href={`https://www.meteoblue.com/en/weather/forecast/week/${c.lat.toFixed(4)}N${c.lon.toFixed(4)}E`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: '#2563eb' }}
+                  >
+                    Weather forecast →
                   </a>
                 </div>
                 <button
@@ -362,6 +464,8 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
           </Marker>
         ))}
       </MarkerClusterGroup>
+      )}
+      {!showFuelStations && (
       <MarkerClusterGroup chunkedLoading>
         {paidCampsites.map(c => (
           <Marker key={c.id} position={[c.lat, c.lon]} icon={greenIcon}>
@@ -371,7 +475,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                 <div style={{ color: '#475569', marginBottom: 8 }}>
                   Paid campsite · {c.lat.toFixed(3)}, {c.lon.toFixed(3)}
                 </div>
-                <div style={{ marginBottom: 8 }}>
+                <div style={{ marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <a 
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.name + ' campsite')}`}
                     target="_blank"
@@ -379,6 +483,14 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                     style={{ fontSize: 12, color: '#2563eb' }}
                   >
                     View on Google Maps →
+                  </a>
+                  <a 
+                    href={`https://www.meteoblue.com/en/weather/forecast/week/${c.lat.toFixed(4)}N${c.lon.toFixed(4)}E`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: '#2563eb' }}
+                  >
+                    Weather forecast →
                   </a>
                 </div>
                 <button
@@ -396,6 +508,43 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
           </Marker>
         ))}
       </MarkerClusterGroup>
+      )}
+      {showFuelStations && (
+        <MarkerClusterGroup chunkedLoading>
+          {fuelStations.map(f => (
+            <Marker key={f.id} position={[f.lat, f.lon]} icon={orangeIcon}>
+              <Popup>
+                <div style={{ minWidth: 180 }}>
+                  <div style={{ fontWeight: 600 }}>⛽ {f.name}</div>
+                  <div style={{ color: '#475569', marginBottom: 8 }}>
+                    Fuel station · {f.lat.toFixed(3)}, {f.lon.toFixed(3)}
+                  </div>
+                  <div style={{ marginBottom: 8 }}>
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f.name + ' fuel station')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: 12, color: '#2563eb' }}
+                    >
+                      View on Google Maps →
+                    </a>
+                  </div>
+                  <button
+                    className="button"
+                    onClick={() => onAddPlace(f)}
+                    disabled={selectedIds.has(f.id)}
+                  >
+                    {selectedIds.has(f.id) ? 'Added' : 'Add to itinerary'}
+                  </button>
+                  {onStartSelected && (
+                    <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(f.lat, f.lon, f.name)}>Set as start</button>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+      )}
       {startLocation && (
         <Marker position={[startLocation.lat, startLocation.lon]}>
           <Popup>
