@@ -43,6 +43,8 @@ export default function App() {
   const [geocodeResults, setGeocodeResults] = useState<GeoResult[] | null>(null)
   const [showFuelStations, setShowFuelStations] = useState(false)
   const [showDumpPoints, setShowDumpPoints] = useState(false)
+  const [showSmallTownsOnly, setShowSmallTownsOnly] = useState(false)
+  const [showCampsites, setShowCampsites] = useState(true)
   const fileInputRef = React.useRef<HTMLInputElement | null>(null)
   const shouldAutoRouteRef = React.useRef(false)
 
@@ -338,6 +340,22 @@ export default function App() {
                 Clear start
               </button>
             )}
+            <button 
+              className="button small" 
+              onClick={() => setShowSmallTownsOnly(!showSmallTownsOnly)} 
+              title="Show only towns with population under 10,000"
+              style={{ backgroundColor: showSmallTownsOnly ? '#f59e0b' : undefined }}
+            >
+              {showSmallTownsOnly ? 'All Towns' : 'Small Towns'}
+            </button>
+            <button 
+              className="button small" 
+              onClick={() => setShowCampsites(!showCampsites)} 
+              title="Show/hide campsite markers"
+              style={{ backgroundColor: showCampsites ? '#10b981' : '#ef4444' }}
+            >
+              {showCampsites ? 'Hide Camps' : 'Show Camps'}
+            </button>
                   <div style={{ position: 'relative' }}>
                     {geocodeResults && (
                       <div className="geocodePickOverlay">
@@ -384,6 +402,8 @@ export default function App() {
             selectingStart={selectingStart}
             showFuelStations={showFuelStations}
             showDumpPoints={showDumpPoints}
+            showSmallTownsOnly={showSmallTownsOnly}
+            showCampsites={showCampsites}
             itinerary={itinerary}
             onStartSelected={(lat: number, lon: number, name?: string) => {
               console.log('Start selected:', lat, lon, name)

@@ -21,6 +21,7 @@ export type Place = {
   type: 'city' | 'town' | 'village' | 'hamlet' | 'locality' | 'attraction'
   lat: number
   lon: number
+  population?: number
 }
 
 type Props = {
@@ -45,6 +46,8 @@ type PropsFull = PropsWithRoute & {
   onStartSelected?: (lat: number, lon: number, name?: string) => void
   showFuelStations?: boolean
   showDumpPoints?: boolean
+  showSmallTownsOnly?: boolean
+  showCampsites?: boolean
   itinerary?: { id: string; name: string; lat: number; lon: number }[]
 }
 
@@ -92,7 +95,7 @@ function CenterOnStart({ startLocation }: { startLocation?: StartLocation }){
   return null
 }
 
-export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, itinerary }: PropsFull) {
+export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, showSmallTownsOnly, showCampsites, itinerary }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
   const [campsites, setCampsites] = useState<Place[]>([])
   const [paidCampsites, setPaidCampsites] = useState<Place[]>([])
@@ -152,7 +155,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     className: 'blue-marker'
   }), [])
 
-  const fetchPlaces = async (bbox: BBox) => {
+  const fetchPlaces = async (bbox: BBox, smallTownsFilter: boolean = false) => {
     // Build bbox string for query
     const bboxStr = `(${bbox.south},${bbox.west},${bbox.north},${bbox.east})`
     const qParts: string[] = []
@@ -165,16 +168,27 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       // At far zoom, show only major cities
       qParts.push(`node["place"="city"]["population"~"[0-9]{6,}"]${bboxStr};`)
     } else if (bbox.zoom < 8) {
-      // Show all cities and large towns
+      // Show all cities and towns
       qParts.push(`node["place"="city"]${bboxStr};`)
-      qParts.push(`node["place"="town"]["population"~"[0-9]{5,}"]${bboxStr};`)
+      qParts.push(`node["place"="town"]${bboxStr};`)
+      // If small towns filter active, also fetch villages/hamlets
+      if (smallTownsFilter) {
+        qParts.push(`node["place"~"village|hamlet"]${bboxStr};`)
+      }
     } else if (bbox.zoom < 10) {
-      // Show cities, towns, and larger villages
-      qParts.push(`node["place"~"city|town"]${bboxStr};`)
-      qParts.push(`node["place"="village"]["population"~"[0-9]{4,}"]${bboxStr};`)
+      // Show cities, towns, and villages
+      qParts.push(`node["place"~"city|town|village"]${bboxStr};`)
+      // If small towns filter active, also fetch hamlets
+      if (smallTownsFilter) {
+        qParts.push(`node["place"="hamlet"]${bboxStr};`)
+      }
     } else if (bbox.zoom < 12) {
       // Show all towns and villages
       qParts.push(`node["place"~"city|town|village"]${bboxStr};`)
+      // If small towns filter active, also fetch hamlets
+      if (smallTownsFilter) {
+        qParts.push(`node["place"="hamlet"]${bboxStr};`)
+      }
     } else {
       // At closest zoom, show everything
       qParts.push(`node["place"~"city|town|village|hamlet|suburb|locality"]${bboxStr};`)
@@ -186,6 +200,8 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     const query = `[out:json][timeout:25];(
       ${qParts.join('\n      ')}
     );out center;`
+
+    console.log('Fetching places with query:', query)
 
     abortRef.current?.abort()
     const controller = new AbortController()
@@ -234,8 +250,13 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
         let type: Place['type'] = 'locality'
         if (tags.tourism === 'attraction') type = 'attraction'
         else if (tags.place) type = tags.place
-        pts.push({ id: `${el.type}/${el.id}`, name, type, lat, lon })
+        
+        // Parse population if available
+        const population = tags.population ? parseInt(tags.population, 10) : undefined
+        
+        pts.push({ id: `${el.type}/${el.id}`, name, type, lat, lon, population })
       }
+      console.log(`Fetched ${pts.length} places:`, pts.slice(0, 10))
       setPlaces(pts)
     } catch (e) {
       if ((e as any).name === 'AbortError') return
@@ -453,10 +474,35 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
   const onBBox = (bbox: BBox) => {
     if (timerRef.current) window.clearTimeout(timerRef.current)
     timerRef.current = window.setTimeout(() => {
-      fetchPlaces(bbox)
+      fetchPlaces(bbox, showSmallTownsOnly)
       fetchCampsites(bbox)
-    }, 400)
+    }, 1000)
   }
+
+  // Filter places based on small towns toggle
+  const filteredPlaces = useMemo(() => {
+    if (!showSmallTownsOnly) return places
+    
+    return places.filter(p => {
+      // Keep attractions regardless of population
+      if (p.type === 'attraction') return true
+      
+      // If population data exists, use it
+      if (p.population !== undefined && !isNaN(p.population)) {
+        return p.population <= 10000
+      }
+      
+      // If no population data, use type-based filtering
+      // Include: villages, hamlets, localities (typically small)
+      // Include: towns (many small towns don't have population data)
+      // Exclude: cities (typically large)
+      if (p.type === 'village' || p.type === 'hamlet' || p.type === 'locality' || p.type === 'town') {
+        return true
+      }
+      
+      return false
+    })
+  }, [places, showSmallTownsOnly])
 
   return (
     <MapContainer center={center} zoom={4} minZoom={3} maxZoom={15} style={{ height: '100%', width: '100%' }}>
@@ -469,7 +515,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     <CenterOnStart startLocation={startLocation} />
       {!showFuelStations && !showDumpPoints && (
         <MarkerClusterGroup chunkedLoading>
-          {places.map(p => (
+          {filteredPlaces.map(p => (
             <Marker key={p.id} position={[p.lat, p.lon]}>
               <Popup>
                 <div style={{ minWidth: 180 }}>
@@ -501,7 +547,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
           ))}
         </MarkerClusterGroup>
       )}
-      {!showFuelStations && !showDumpPoints && (
+      {!showFuelStations && !showDumpPoints && showCampsites && (
         <MarkerClusterGroup chunkedLoading>
         {campsites.map(c => (
           <Marker key={c.id} position={[c.lat, c.lon]} icon={purpleIcon}>
@@ -545,7 +591,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
         ))}
       </MarkerClusterGroup>
       )}
-      {!showFuelStations && !showDumpPoints && (
+      {!showFuelStations && !showDumpPoints && showCampsites && (
       <MarkerClusterGroup chunkedLoading>
         {paidCampsites.map(c => (
           <Marker key={c.id} position={[c.lat, c.lon]} icon={greenIcon}>
