@@ -44,6 +44,7 @@ type PropsFull = PropsWithRoute & {
   selectingStart?: boolean
   onStartSelected?: (lat: number, lon: number, name?: string) => void
   showFuelStations?: boolean
+  showDumpPoints?: boolean
   itinerary?: { id: string; name: string; lat: number; lon: number }[]
 }
 
@@ -91,11 +92,12 @@ function CenterOnStart({ startLocation }: { startLocation?: StartLocation }){
   return null
 }
 
-export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, itinerary }: PropsFull) {
+export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, itinerary }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
   const [campsites, setCampsites] = useState<Place[]>([])
   const [paidCampsites, setPaidCampsites] = useState<Place[]>([])
   const [fuelStations, setFuelStations] = useState<Place[]>([])
+  const [dumpPoints, setDumpPoints] = useState<Place[]>([])
   const abortRef = useRef<AbortController | null>(null)
   const timerRef = useRef<number | null>(null)
 
@@ -136,6 +138,18 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
     className: 'orange-marker'
+  }), [])
+
+  // Create blue icon for dump points
+  const blueIcon = useMemo(() => new L.Icon({
+    iconRetinaUrl: marker2x,
+    iconUrl: marker1x,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: 'blue-marker'
   }), [])
 
   const fetchPlaces = async (bbox: BBox) => {
@@ -370,6 +384,72 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     fetchFuelStations()
   }, [showFuelStations, itinerary])
 
+  // Fetch RV dump points near itinerary stops
+  useEffect(() => {
+    if (!showDumpPoints || !itinerary || itinerary.length === 0) {
+      setDumpPoints([])
+      return
+    }
+
+    const fetchDumpPoints = async () => {
+      const radius = 10000 // 10km radius around each stop
+      const allDumps: Place[] = []
+      const seenIds = new Set<string>()
+
+      for (const stop of itinerary) {
+        const query = `[out:json][timeout:25];
+          (
+            node["amenity"="sanitary_dump_station"](around:${radius},${stop.lat},${stop.lon});
+          );
+          out body;`
+
+        try {
+          const endpoints = [
+            'https://overpass-api.de/api/interpreter',
+            'https://lz4.overpass-api.de/api/interpreter',
+            'https://overpass.kumi.systems/api/interpreter'
+          ]
+
+          let data: { elements: any[] } | null = null
+          for (const url of endpoints) {
+            try {
+              const res = await fetch(url, {
+                method: 'POST',
+                body: query,
+                headers: { 'Content-Type': 'text/plain' },
+              })
+              if (!res.ok) continue
+              data = await res.json() as { elements: any[] }
+              break
+            } catch (err) {
+              continue
+            }
+          }
+
+          if (!data) continue
+
+          for (const el of data.elements) {
+            if (el.type !== 'node') continue
+            const { lat, lon, tags, id } = el
+            if (!lat || !lon) continue
+            const dumpId = `dump/${id}`
+            if (seenIds.has(dumpId)) continue
+            seenIds.add(dumpId)
+
+            const name = tags?.name || 'RV Dump Point'
+            allDumps.push({ id: dumpId, name, type: 'attraction' as const, lat, lon })
+          }
+        } catch (e) {
+          console.error('Dump point fetch error:', e)
+        }
+      }
+
+      setDumpPoints(allDumps)
+    }
+
+    fetchDumpPoints()
+  }, [showDumpPoints, itinerary])
+
   const onBBox = (bbox: BBox) => {
     if (timerRef.current) window.clearTimeout(timerRef.current)
     timerRef.current = window.setTimeout(() => {
@@ -387,7 +467,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       <BBoxWatcher onChange={onBBox} />
   <StartSelector selectingStart={selectingStart} onStartSelected={onStartSelected} />
     <CenterOnStart startLocation={startLocation} />
-      {!showFuelStations && (
+      {!showFuelStations && !showDumpPoints && (
         <MarkerClusterGroup chunkedLoading>
           {places.map(p => (
             <Marker key={p.id} position={[p.lat, p.lon]}>
@@ -421,7 +501,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
           ))}
         </MarkerClusterGroup>
       )}
-      {!showFuelStations && (
+      {!showFuelStations && !showDumpPoints && (
         <MarkerClusterGroup chunkedLoading>
         {campsites.map(c => (
           <Marker key={c.id} position={[c.lat, c.lon]} icon={purpleIcon}>
@@ -465,7 +545,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
         ))}
       </MarkerClusterGroup>
       )}
-      {!showFuelStations && (
+      {!showFuelStations && !showDumpPoints && (
       <MarkerClusterGroup chunkedLoading>
         {paidCampsites.map(c => (
           <Marker key={c.id} position={[c.lat, c.lon]} icon={greenIcon}>
@@ -538,6 +618,42 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                   </button>
                   {onStartSelected && (
                     <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(f.lat, f.lon, f.name)}>Set as start</button>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+      )}
+      {showDumpPoints && (
+        <MarkerClusterGroup chunkedLoading>
+          {dumpPoints.map(d => (
+            <Marker key={d.id} position={[d.lat, d.lon]} icon={blueIcon}>
+              <Popup>
+                <div style={{ minWidth: 180 }}>
+                  <div style={{ fontWeight: 600 }}>🚽 {d.name}</div>
+                  <div style={{ color: '#475569', marginBottom: 8 }}>
+                    RV Dump Point · {d.lat.toFixed(3)}, {d.lon.toFixed(3)}
+                  </div>
+                  <div style={{ marginBottom: 8 }}>
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.name + ' dump station')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: 12, color: '#2563eb' }}
+                    >
+                      View on Google Maps →
+                    </a>
+                  </div>
+                  <button
+                    className="button"
+                    onClick={() => onAddPlace(d)}
+                    disabled={selectedIds.has(d.id)}
+                  >
+                    {selectedIds.has(d.id) ? 'Added' : 'Add to itinerary'}
+                  </button>
+                  {onStartSelected && (
+                    <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(d.lat, d.lon, d.name)}>Set as start</button>
                   )}
                 </div>
               </Popup>

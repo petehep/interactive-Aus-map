@@ -152,3 +152,8 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
 .orange-marker {
   filter: hue-rotate(330deg) saturate(2.0) brightness(1.1);
 }
+
+/* Blue marker styling for dump points */
+.blue-marker {
+  filter: hue-rotate(180deg) saturate(2.0) brightness(1.0);
+}

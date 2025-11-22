@@ -42,6 +42,7 @@ export default function App() {
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [geocodeResults, setGeocodeResults] = useState<GeoResult[] | null>(null)
   const [showFuelStations, setShowFuelStations] = useState(false)
+  const [showDumpPoints, setShowDumpPoints] = useState(false)
   const fileInputRef = React.useRef<HTMLInputElement | null>(null)
   const shouldAutoRouteRef = React.useRef(false)
 
@@ -382,11 +383,27 @@ export default function App() {
             startLocation={startLocation}
             selectingStart={selectingStart}
             showFuelStations={showFuelStations}
+            showDumpPoints={showDumpPoints}
             itinerary={itinerary}
             onStartSelected={(lat: number, lon: number, name?: string) => {
               console.log('Start selected:', lat, lon, name)
               setStartLocation({ lat, lon, name })
               setSelectingStart(false)
+              
+              // Add start location to itinerary as well
+              const startPlace: ItineraryItem = {
+                id: `start-${lat}-${lon}`,
+                name: name || 'Start location',
+                type: 'locality',
+                lat,
+                lon,
+                addedAt: Date.now()
+              }
+              setItinerary((prev) => {
+                // Don't add if already in itinerary
+                if (prev.some((x) => x.id === startPlace.id)) return prev
+                return [startPlace, ...prev]
+              })
             }}
           />
         </div>
@@ -425,6 +442,14 @@ export default function App() {
               style={{ backgroundColor: showFuelStations ? '#10b981' : undefined }}
             >
               {showFuelStations ? 'Hide Fuel' : 'Show Fuel'}
+            </button>
+            <button 
+              className="button" 
+              onClick={() => setShowDumpPoints(!showDumpPoints)} 
+              title="Show RV dump points near itinerary stops"
+              style={{ backgroundColor: showDumpPoints ? '#8b5cf6' : undefined }}
+            >
+              {showDumpPoints ? 'Hide Dumps' : 'Show Dumps'}
             </button>
             <button className="button" onClick={exportItinerary} disabled={itinerary.length === 0} title="Download itinerary as JSON">Save itinerary</button>
             <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>
