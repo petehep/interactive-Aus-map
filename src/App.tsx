@@ -291,6 +291,21 @@ export default function App() {
     setStartQuery('')
     setGeocodeResults(null)
     setSelectingStart(false)
+    
+    // Add start location to itinerary
+    const startPlace: ItineraryItem = {
+      id: `start-${r.lat}-${r.lon}`,
+      name: r.name || 'Start location',
+      type: 'locality',
+      lat: r.lat,
+      lon: r.lon,
+      addedAt: Date.now()
+    }
+    setItinerary((prev) => {
+      // Don't add if already in itinerary
+      if (prev.some((x) => x.id === startPlace.id)) return prev
+      return [startPlace, ...prev]
+    })
   }, [])
 
   const clearStart = useCallback(() => {
