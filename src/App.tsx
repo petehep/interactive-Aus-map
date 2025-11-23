@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import MapView, { Place } from './components/MapView'
 import Itinerary from './components/Itinerary'
+import Favorites from './components/Favorites'
 import type { LatLngTuple } from 'leaflet'
 
 export type ItineraryItem = Place & { addedAt: number }
@@ -34,6 +35,23 @@ export default function App() {
     setItinerary((prev) => prev.filter((x) => x.id !== id))
   }, [])
 
+  const toggleFavorite = useCallback((place: Place) => {
+    setFavorites((prev) => {
+      const exists = prev.some((f) => f.id === place.id)
+      const updated = exists ? prev.filter((f) => f.id !== place.id) : [...prev, place]
+      localStorage.setItem('trip-favorites', JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
+  const removeFavorite = useCallback((id: string) => {
+    setFavorites((prev) => {
+      const updated = prev.filter((f) => f.id !== id)
+      localStorage.setItem('trip-favorites', JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
   const [route, setRoute] = useState<RouteResult>(null)
   const [startLocation, setStartLocation] = useState<{ lat: number; lon: number; name?: string } | undefined>(undefined)
   const [selectingStart, setSelectingStart] = useState(false)
@@ -45,6 +63,10 @@ export default function App() {
   const [showDumpPoints, setShowDumpPoints] = useState(false)
   const [showSmallTownsOnly, setShowSmallTownsOnly] = useState(false)
   const [showCampsites, setShowCampsites] = useState(true)
+  const [favorites, setFavorites] = useState<Place[]>(() => {
+    const stored = localStorage.getItem('trip-favorites')
+    return stored ? JSON.parse(stored) : []
+  })
   const fileInputRef = React.useRef<HTMLInputElement | null>(null)
   const shouldAutoRouteRef = React.useRef(false)
 
@@ -419,6 +441,8 @@ export default function App() {
             showDumpPoints={showDumpPoints}
             showSmallTownsOnly={showSmallTownsOnly}
             showCampsites={showCampsites}
+            favorites={favorites}
+            toggleFavorite={toggleFavorite}
             itinerary={itinerary}
             onStartSelected={(lat: number, lon: number, name?: string) => {
               console.log('Start selected:', lat, lon, name)
@@ -492,6 +516,10 @@ export default function App() {
             <button className="button" onClick={clearItinerary} disabled={itinerary.length === 0} title="Remove all stops from itinerary">Clear itinerary</button>
           </div>
           <Itinerary items={itinerary} onRemove={onRemove} />
+          <div style={{ marginTop: 24 }}>
+            <h2 style={{ margin: '0 0 12px 0', fontSize: 18, fontWeight: 600 }}>❤️ Favorites ({favorites.length})</h2>
+            <Favorites favorites={favorites} onAddToItinerary={onAddPlace} onRemove={removeFavorite} />
+          </div>
         </aside>
       </main>
     </div>

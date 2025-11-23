@@ -48,6 +48,8 @@ type PropsFull = PropsWithRoute & {
   showDumpPoints?: boolean
   showSmallTownsOnly?: boolean
   showCampsites?: boolean
+  favorites?: Place[]
+  toggleFavorite?: (place: Place) => void
   itinerary?: { id: string; name: string; lat: number; lon: number }[]
 }
 
@@ -95,7 +97,7 @@ function CenterOnStart({ startLocation }: { startLocation?: StartLocation }){
   return null
 }
 
-export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, showSmallTownsOnly, showCampsites, itinerary }: PropsFull) {
+export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, showSmallTownsOnly, showCampsites, favorites = [], toggleFavorite, itinerary }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
   const [campsites, setCampsites] = useState<Place[]>([])
   const [paidCampsites, setPaidCampsites] = useState<Place[]>([])
@@ -524,16 +526,31 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                       Weather forecast →
                     </a>
                   </div>
-                  <button
-                    className="button"
-                    onClick={() => onAddPlace(p)}
-                    disabled={selectedIds.has(p.id)}
-                  >
-                    {selectedIds.has(p.id) ? 'Added' : 'Add to itinerary'}
-                  </button>
-                  {onStartSelected && (
-                    <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(p.lat, p.lon, p.name)}>Set as start</button>
-                  )}
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <button
+                      className="button"
+                      onClick={() => onAddPlace(p)}
+                      disabled={selectedIds.has(p.id)}
+                    >
+                      {selectedIds.has(p.id) ? 'Added' : 'Add to itinerary'}
+                    </button>
+                    {toggleFavorite && (() => {
+                      const isFavorite = favorites.some(f => f.id === p.id)
+                      return (
+                        <button
+                          className="button"
+                          onClick={() => toggleFavorite(p)}
+                          style={{ background: isFavorite ? '#ec4899' : undefined }}
+                          title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                        >
+                          {isFavorite ? '❤️' : '🤍'}
+                        </button>
+                      )
+                    })()}
+                    {onStartSelected && (
+                      <button className="button" onClick={() => onStartSelected(p.lat, p.lon, p.name)}>Set as start</button>
+                    )}
+                  </div>
                 </div>
               </Popup>
             </Marker>
