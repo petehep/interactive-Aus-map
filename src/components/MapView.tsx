@@ -602,7 +602,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
   <StartSelector selectingStart={selectingStart} onStartSelected={onStartSelected} />
     <CenterOnStart startLocation={startLocation} />
       <MapReady onMapReady={onMapReady} />
-      {!showFuelStations && !showDumpPoints && (
+      {!showFuelStations && !showDumpPoints && !showWaterPoints && (
         <MarkerClusterGroup chunkedLoading>
           {filteredPlaces.map(p => (
             <Marker key={p.id} position={[p.lat, p.lon]}>
@@ -651,7 +651,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
           ))}
         </MarkerClusterGroup>
       )}
-      {!showFuelStations && !showDumpPoints && showCampsites && (
+      {!showFuelStations && !showDumpPoints && !showWaterPoints && showCampsites && (
         <MarkerClusterGroup chunkedLoading>
         {campsites.map(c => (
           <Marker key={c.id} position={[c.lat, c.lon]} icon={purpleIcon}>
@@ -679,23 +679,38 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                     Weather forecast →
                   </a>
                 </div>
-                <button
-                  className="button"
-                  onClick={() => onAddPlace(c)}
-                  disabled={selectedIds.has(c.id)}
-                >
-                  {selectedIds.has(c.id) ? 'Added' : 'Add to itinerary'}
-                </button>
-                {onStartSelected && (
-                  <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(c.lat, c.lon, c.name)}>Set as start</button>
-                )}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button
+                    className="button"
+                    onClick={() => onAddPlace(c)}
+                    disabled={selectedIds.has(c.id)}
+                  >
+                    {selectedIds.has(c.id) ? 'Added' : 'Add to itinerary'}
+                  </button>
+                  {toggleFavorite && (() => {
+                    const isFavorite = favorites.some(f => f.id === c.id)
+                    return (
+                      <button
+                        className="button"
+                        onClick={() => toggleFavorite(c)}
+                        style={{ background: isFavorite ? '#ec4899' : undefined }}
+                        title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        {isFavorite ? '❤️' : '🤍'}
+                      </button>
+                    )
+                  })()}
+                  {onStartSelected && (
+                    <button className="button" onClick={() => onStartSelected(c.lat, c.lon, c.name)}>Set as start</button>
+                  )}
+                </div>
               </div>
             </Popup>
           </Marker>
         ))}
       </MarkerClusterGroup>
       )}
-      {!showFuelStations && !showDumpPoints && showCampsites && (
+      {!showFuelStations && !showDumpPoints && !showWaterPoints && showCampsites && (
       <MarkerClusterGroup chunkedLoading>
         {paidCampsites.map(c => (
           <Marker key={c.id} position={[c.lat, c.lon]} icon={greenIcon}>
@@ -723,16 +738,31 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                     Weather forecast →
                   </a>
                 </div>
-                <button
-                  className="button"
-                  onClick={() => onAddPlace(c)}
-                  disabled={selectedIds.has(c.id)}
-                >
-                  {selectedIds.has(c.id) ? 'Added' : 'Add to itinerary'}
-                </button>
-                {onStartSelected && (
-                  <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(c.lat, c.lon, c.name)}>Set as start</button>
-                )}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button
+                    className="button"
+                    onClick={() => onAddPlace(c)}
+                    disabled={selectedIds.has(c.id)}
+                  >
+                    {selectedIds.has(c.id) ? 'Added' : 'Add to itinerary'}
+                  </button>
+                  {toggleFavorite && (() => {
+                    const isFavorite = favorites.some(f => f.id === c.id)
+                    return (
+                      <button
+                        className="button"
+                        onClick={() => toggleFavorite(c)}
+                        style={{ background: isFavorite ? '#ec4899' : undefined }}
+                        title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        {isFavorite ? '❤️' : '🤍'}
+                      </button>
+                    )
+                  })()}
+                  {onStartSelected && (
+                    <button className="button" onClick={() => onStartSelected(c.lat, c.lon, c.name)}>Set as start</button>
+                  )}
+                </div>
               </div>
             </Popup>
           </Marker>
