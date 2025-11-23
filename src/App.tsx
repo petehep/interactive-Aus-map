@@ -531,6 +531,14 @@ export default function App() {
             >
               {showDumpPoints ? 'Hide Dumps' : 'Show Dumps'}
             </button>
+            <button 
+              className="button" 
+              onClick={() => setShowWaterPoints(!showWaterPoints)} 
+              title="Show drinking water filling points near itinerary stops"
+              style={{ backgroundColor: showWaterPoints ? '#8b5cf6' : undefined }}
+            >
+              {showWaterPoints ? 'Hide Water' : 'Show Water'}
+            </button>
             <button className="button" onClick={exportItinerary} disabled={itinerary.length === 0} title="Download itinerary as JSON">Save itinerary</button>
             <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>
             <input ref={fileInputRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={onFileChange} />
