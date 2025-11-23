@@ -45,8 +45,18 @@ export default function App() {
   }, [])
 
   const removeFavorite = useCallback((id: string) => {
-    setFavorites((prev) => {
-      const updated = prev.filter((f) => f.id !== id)
+    setFavorites(prev => {
+      const updated = prev.filter(f => f.id !== id)
+      localStorage.setItem('trip-favorites', JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
+  const toggleVisited = useCallback((id: string) => {
+    setFavorites(prev => {
+      const updated = prev.map(f => 
+        f.id === id ? { ...f, visited: !f.visited } : f
+      )
       localStorage.setItem('trip-favorites', JSON.stringify(updated))
       return updated
     })
@@ -67,6 +77,14 @@ export default function App() {
     const stored = localStorage.getItem('trip-favorites')
     return stored ? JSON.parse(stored) : []
   })
+  const [mapRef, setMapRef] = useState<any>(null)
+
+  const centerMap = useCallback((lat: number, lon: number) => {
+    if (mapRef) {
+      mapRef.setView([lat, lon], 13, { animate: true })
+    }
+  }, [mapRef])
+
   const fileInputRef = React.useRef<HTMLInputElement | null>(null)
   const shouldAutoRouteRef = React.useRef(false)
 
@@ -444,6 +462,7 @@ export default function App() {
             favorites={favorites}
             toggleFavorite={toggleFavorite}
             itinerary={itinerary}
+            onMapReady={setMapRef}
             onStartSelected={(lat: number, lon: number, name?: string) => {
               console.log('Start selected:', lat, lon, name)
               setStartLocation({ lat, lon, name })
@@ -518,7 +537,13 @@ export default function App() {
           <Itinerary items={itinerary} onRemove={onRemove} />
           <div style={{ marginTop: 24 }}>
             <h2 style={{ margin: '0 0 12px 0', fontSize: 18, fontWeight: 600 }}>❤️ Favorites ({favorites.length})</h2>
-            <Favorites favorites={favorites} onAddToItinerary={onAddPlace} onRemove={removeFavorite} />
+            <Favorites 
+              favorites={favorites} 
+              onAddToItinerary={onAddPlace} 
+              onRemove={removeFavorite}
+              onCenterMap={centerMap}
+              onToggleVisited={toggleVisited}
+            />
           </div>
         </aside>
       </main>

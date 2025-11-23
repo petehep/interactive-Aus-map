@@ -22,6 +22,7 @@ export type Place = {
   lat: number
   lon: number
   population?: number
+  visited?: boolean
 }
 
 type Props = {
@@ -51,6 +52,7 @@ type PropsFull = PropsWithRoute & {
   favorites?: Place[]
   toggleFavorite?: (place: Place) => void
   itinerary?: { id: string; name: string; lat: number; lon: number }[]
+  onMapReady?: (mapInstance: any) => void
 }
 
 type BBox = { south: number; west: number; north: number; east: number; zoom: number }
@@ -97,7 +99,17 @@ function CenterOnStart({ startLocation }: { startLocation?: StartLocation }){
   return null
 }
 
-export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, showSmallTownsOnly, showCampsites, favorites = [], toggleFavorite, itinerary }: PropsFull) {
+function MapReady({ onMapReady }: { onMapReady?: (mapInstance: any) => void }) {
+  const map = useMap()
+  React.useEffect(() => {
+    if (onMapReady) {
+      onMapReady(map)
+    }
+  }, [map, onMapReady])
+  return null
+}
+
+export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, showSmallTownsOnly, showCampsites, favorites = [], toggleFavorite, itinerary, onMapReady }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
   const [campsites, setCampsites] = useState<Place[]>([])
   const [paidCampsites, setPaidCampsites] = useState<Place[]>([])
@@ -508,6 +520,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       <BBoxWatcher onChange={onBBox} />
   <StartSelector selectingStart={selectingStart} onStartSelected={onStartSelected} />
     <CenterOnStart startLocation={startLocation} />
+      <MapReady onMapReady={onMapReady} />
       {!showFuelStations && !showDumpPoints && (
         <MarkerClusterGroup chunkedLoading>
           {filteredPlaces.map(p => (

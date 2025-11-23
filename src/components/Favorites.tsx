@@ -7,12 +7,15 @@ type Place = {
   lat: number
   lon: number
   population?: number
+  visited?: boolean
 }
 
 type Props = {
   favorites: Place[]
   onAddToItinerary: (place: Place) => void
   onRemove: (id: string) => void
+  onCenterMap: (lat: number, lon: number) => void
+  onToggleVisited: (id: string) => void
 }
 
 // Australian states/territories with their approximate boundaries
@@ -53,7 +56,7 @@ const stateNames: Record<string, string> = {
   'ACT': 'Australian Capital Territory'
 }
 
-export default function Favorites({ favorites, onAddToItinerary, onRemove }: Props) {
+export default function Favorites({ favorites, onAddToItinerary, onRemove, onCenterMap, onToggleVisited }: Props) {
   const groupedByState = useMemo(() => {
     const groups: Record<string, Place[]> = {}
     
@@ -101,15 +104,43 @@ export default function Favorites({ favorites, onAddToItinerary, onRemove }: Pro
               style={{ 
                 padding: '8px 12px', 
                 borderBottom: '1px solid #e2e8f0',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
+                opacity: place.visited ? 0.6 : 1
               }}
             >
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>{place.name}</div>
-                <div style={{ fontSize: 11, color: '#64748b' }}>
+              <div style={{ marginBottom: 8 }}>
+                <div 
+                  style={{ 
+                    fontSize: 13, 
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    color: '#2563eb',
+                    textDecoration: place.visited ? 'line-through' : 'none'
+                  }}
+                  onClick={() => onCenterMap(place.lat, place.lon)}
+                  title="Click to center map on this location"
+                >
+                  {place.visited ? '✓ ' : ''}{place.name}
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
                   {place.type} · {place.lat.toFixed(3)}, {place.lon.toFixed(3)}
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                  <a 
+                    href={`https://www.meteoblue.com/en/weather/forecast/week/${place.lat.toFixed(4)}N${place.lon.toFixed(4)}E`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 11, color: '#2563eb', textDecoration: 'none' }}
+                  >
+                    ☀️ Weather
+                  </a>
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 11, color: '#2563eb', textDecoration: 'none' }}
+                  >
+                    🗺️ Google Maps
+                  </a>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 4 }}>
@@ -120,6 +151,14 @@ export default function Favorites({ favorites, onAddToItinerary, onRemove }: Pro
                   style={{ fontSize: 11, padding: '4px 8px' }}
                 >
                   Add
+                </button>
+                <button
+                  className="button small"
+                  onClick={() => onToggleVisited(place.id)}
+                  title={place.visited ? 'Mark as unvisited' : 'Mark as visited'}
+                  style={{ fontSize: 11, padding: '4px 8px', background: place.visited ? '#10b981' : '#6b7280' }}
+                >
+                  {place.visited ? '✓' : '○'}
                 </button>
                 <button
                   className="button small"
