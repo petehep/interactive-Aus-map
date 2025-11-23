@@ -71,6 +71,7 @@ export default function App() {
   const [geocodeResults, setGeocodeResults] = useState<GeoResult[] | null>(null)
   const [showFuelStations, setShowFuelStations] = useState(false)
   const [showDumpPoints, setShowDumpPoints] = useState(false)
+  const [showWaterPoints, setShowWaterPoints] = useState(false)
   const [showSmallTownsOnly, setShowSmallTownsOnly] = useState(false)
   const [showCampsites, setShowCampsites] = useState(true)
   const [favorites, setFavorites] = useState<Place[]>(() => {
@@ -457,6 +458,7 @@ export default function App() {
             selectingStart={selectingStart}
             showFuelStations={showFuelStations}
             showDumpPoints={showDumpPoints}
+            showWaterPoints={showWaterPoints}
             showSmallTownsOnly={showSmallTownsOnly}
             showCampsites={showCampsites}
             favorites={favorites}

@@ -158,6 +158,11 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   filter: hue-rotate(180deg) saturate(2.0) brightness(1.0);
 }
 
+/* Cyan marker styling for water points */
+.cyan-marker {
+  filter: hue-rotate(150deg) saturate(2.5) brightness(1.2);
+}
+
 /* Mobile-specific styles */
 @media (max-width: 768px) {
   .header {

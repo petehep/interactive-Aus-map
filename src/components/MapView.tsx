@@ -47,6 +47,7 @@ type PropsFull = PropsWithRoute & {
   onStartSelected?: (lat: number, lon: number, name?: string) => void
   showFuelStations?: boolean
   showDumpPoints?: boolean
+  showWaterPoints?: boolean
   showSmallTownsOnly?: boolean
   showCampsites?: boolean
   favorites?: Place[]
@@ -109,12 +110,13 @@ function MapReady({ onMapReady }: { onMapReady?: (mapInstance: any) => void }) {
   return null
 }
 
-export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, showSmallTownsOnly, showCampsites, favorites = [], toggleFavorite, itinerary, onMapReady }: PropsFull) {
+export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, showWaterPoints, showSmallTownsOnly, showCampsites, favorites = [], toggleFavorite, itinerary, onMapReady }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
   const [campsites, setCampsites] = useState<Place[]>([])
   const [paidCampsites, setPaidCampsites] = useState<Place[]>([])
   const [fuelStations, setFuelStations] = useState<Place[]>([])
   const [dumpPoints, setDumpPoints] = useState<Place[]>([])
+  const [waterPoints, setWaterPoints] = useState<Place[]>([])
   const abortRef = useRef<AbortController | null>(null)
   const timerRef = useRef<number | null>(null)
 
@@ -167,6 +169,18 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
     className: 'blue-marker'
+  }), [])
+
+  // Create cyan icon for water points
+  const cyanIcon = useMemo(() => new L.Icon({
+    iconRetinaUrl: marker2x,
+    iconUrl: marker1x,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: 'cyan-marker'
   }), [])
 
   const fetchPlaces = async (bbox: BBox, smallTownsFilter: boolean = false) => {
@@ -485,6 +499,73 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     fetchDumpPoints()
   }, [showDumpPoints, itinerary])
 
+  // Fetch water points when enabled
+  useEffect(() => {
+    if (!showWaterPoints || !itinerary?.length) {
+      setWaterPoints([])
+      return
+    }
+
+    const fetchWaterPoints = async () => {
+      const radius = 10000 // 10km radius around each stop
+      const allWater: Place[] = []
+      const seenIds = new Set<string>()
+
+      for (const stop of itinerary) {
+        const query = `[out:json][timeout:25];
+          (
+            node["amenity"="drinking_water"](around:${radius},${stop.lat},${stop.lon});
+            node["amenity"="water_point"](around:${radius},${stop.lat},${stop.lon});
+          );
+          out body;`
+
+        try {
+          const endpoints = [
+            'https://overpass-api.de/api/interpreter',
+            'https://lz4.overpass-api.de/api/interpreter',
+            'https://overpass.kumi.systems/api/interpreter'
+          ]
+
+          let data: { elements: any[] } | null = null
+          for (const url of endpoints) {
+            try {
+              const res = await fetch(url, {
+                method: 'POST',
+                body: query,
+                headers: { 'Content-Type': 'text/plain' },
+              })
+              if (!res.ok) continue
+              data = await res.json() as { elements: any[] }
+              break
+            } catch (err) {
+              continue
+            }
+          }
+
+          if (!data) continue
+
+          for (const el of data.elements) {
+            if (el.type !== 'node') continue
+            const { lat, lon, tags, id } = el
+            if (!lat || !lon) continue
+            const waterId = `water/${id}`
+            if (seenIds.has(waterId)) continue
+            seenIds.add(waterId)
+
+            const name = tags?.name || 'Water Point'
+            allWater.push({ id: waterId, name, type: 'attraction' as const, lat, lon })
+          }
+        } catch (e) {
+          console.error('Water point fetch error:', e)
+        }
+      }
+
+      setWaterPoints(allWater)
+    }
+
+    fetchWaterPoints()
+  }, [showWaterPoints, itinerary])
+
   const onBBox = (bbox: BBox) => {
     if (timerRef.current) window.clearTimeout(timerRef.current)
     timerRef.current = window.setTimeout(() => {
@@ -723,6 +804,42 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                   </button>
                   {onStartSelected && (
                     <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(d.lat, d.lon, d.name)}>Set as start</button>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+      )}
+      {showWaterPoints && (
+        <MarkerClusterGroup chunkedLoading>
+          {waterPoints.map(w => (
+            <Marker key={w.id} position={[w.lat, w.lon]} icon={cyanIcon}>
+              <Popup>
+                <div style={{ minWidth: 180 }}>
+                  <div style={{ fontWeight: 600 }}>💧 {w.name}</div>
+                  <div style={{ color: '#475569', marginBottom: 8 }}>
+                    Drinking Water · {w.lat.toFixed(3)}, {w.lon.toFixed(3)}
+                  </div>
+                  <div style={{ marginBottom: 8 }}>
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(w.name + ' water point')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: 12, color: '#2563eb' }}
+                    >
+                      View on Google Maps →
+                    </a>
+                  </div>
+                  <button
+                    className="button"
+                    onClick={() => onAddPlace(w)}
+                    disabled={selectedIds.has(w.id)}
+                  >
+                    {selectedIds.has(w.id) ? 'Added' : 'Add to itinerary'}
+                  </button>
+                  {onStartSelected && (
+                    <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(w.lat, w.lon, w.name)}>Set as start</button>
                   )}
                 </div>
               </Popup>
