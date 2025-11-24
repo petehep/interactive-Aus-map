@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import MapView, { Place } from './components/MapView'
 import Itinerary from './components/Itinerary'
 import Favorites from './components/Favorites'
+import VisitedPlaces from './components/VisitedPlaces'
 import type { LatLngTuple } from 'leaflet'
 
 export type ItineraryItem = Place & { addedAt: number }
@@ -54,9 +55,33 @@ export default function App() {
 
   const toggleVisited = useCallback((id: string) => {
     setFavorites(prev => {
-      const updated = prev.map(f => 
-        f.id === id ? { ...f, visited: !f.visited } : f
-      )
+      const updated = prev.map(f => {
+        if (f.id === id) {
+          const newVisited = !f.visited
+          const place = { ...f, visited: newVisited, visitedAt: newVisited ? Date.now() : undefined }
+          
+          // Update visited places list
+          setVisitedPlaces(vp => {
+            if (newVisited) {
+              // Add to visited if not already there
+              if (!vp.some(p => p.id === id)) {
+                const updatedVisited = [...vp, place]
+                localStorage.setItem('trip-visited-places', JSON.stringify(updatedVisited))
+                return updatedVisited
+              }
+            } else {
+              // Remove from visited
+              const updatedVisited = vp.filter(p => p.id !== id)
+              localStorage.setItem('trip-visited-places', JSON.stringify(updatedVisited))
+              return updatedVisited
+            }
+            return vp
+          })
+          
+          return place
+        }
+        return f
+      })
       localStorage.setItem('trip-favorites', JSON.stringify(updated))
       return updated
     })
@@ -78,7 +103,30 @@ export default function App() {
     const stored = localStorage.getItem('trip-favorites')
     return stored ? JSON.parse(stored) : []
   })
+  const [visitedPlaces, setVisitedPlaces] = useState<Place[]>(() => {
+    const stored = localStorage.getItem('trip-visited-places')
+    return stored ? JSON.parse(stored) : []
+  })
+  const [showVisitedModal, setShowVisitedModal] = useState(false)
   const [mapRef, setMapRef] = useState<any>(null)
+
+  const unvisitPlace = useCallback((id: string) => {
+    // Remove from visited places list
+    setVisitedPlaces(prev => {
+      const updated = prev.filter(p => p.id !== id)
+      localStorage.setItem('trip-visited-places', JSON.stringify(updated))
+      return updated
+    })
+    
+    // Also update in favorites if it exists there
+    setFavorites(prev => {
+      const updated = prev.map(f => 
+        f.id === id ? { ...f, visited: false, visitedAt: undefined } : f
+      )
+      localStorage.setItem('trip-favorites', JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   const centerMap = useCallback((lat: number, lon: number) => {
     if (mapRef) {
@@ -465,6 +513,7 @@ export default function App() {
             toggleFavorite={toggleFavorite}
             itinerary={itinerary}
             onMapReady={setMapRef}
+            visitedPlaces={visitedPlaces}
             onStartSelected={(lat: number, lon: number, name?: string) => {
               console.log('Start selected:', lat, lon, name)
               setStartLocation({ lat, lon, name })
@@ -543,6 +592,14 @@ export default function App() {
             <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>
             <input ref={fileInputRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={onFileChange} />
             <button className="button" onClick={clearItinerary} disabled={itinerary.length === 0} title="Remove all stops from itinerary">Clear itinerary</button>
+            <button 
+              className="button" 
+              onClick={() => setShowVisitedModal(true)} 
+              title="View all places you've visited"
+              style={{ backgroundColor: visitedPlaces.length > 0 ? '#10b981' : undefined }}
+            >
+              📍 Show Visits ({visitedPlaces.length})
+            </button>
           </div>
           <Itinerary items={itinerary} onRemove={onRemove} />
           <div style={{ marginTop: 24 }}>
@@ -557,6 +614,17 @@ export default function App() {
           </div>
         </aside>
       </main>
+      {showVisitedModal && (
+        <VisitedPlaces
+          visitedPlaces={visitedPlaces}
+          onCenterMap={(lat, lon) => {
+            centerMap(lat, lon)
+            setShowVisitedModal(false)
+          }}
+          onUnvisit={unvisitPlace}
+          onClose={() => setShowVisitedModal(false)}
+        />
+      )}
     </div>
   )
 }

@@ -23,6 +23,7 @@ export type Place = {
   lon: number
   population?: number
   visited?: boolean
+  visitedAt?: number
 }
 
 type Props = {
@@ -54,6 +55,7 @@ type PropsFull = PropsWithRoute & {
   toggleFavorite?: (place: Place) => void
   itinerary?: { id: string; name: string; lat: number; lon: number }[]
   onMapReady?: (mapInstance: any) => void
+  visitedPlaces?: Place[]
 }
 
 type BBox = { south: number; west: number; north: number; east: number; zoom: number }
@@ -110,7 +112,7 @@ function MapReady({ onMapReady }: { onMapReady?: (mapInstance: any) => void }) {
   return null
 }
 
-export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, showWaterPoints, showSmallTownsOnly, showCampsites, favorites = [], toggleFavorite, itinerary, onMapReady }: PropsFull) {
+export default function MapView({ onAddPlace, selectedIds, route, startLocation, selectingStart, onStartSelected, showFuelStations, showDumpPoints, showWaterPoints, showSmallTownsOnly, showCampsites, favorites = [], toggleFavorite, itinerary, onMapReady, visitedPlaces = [] }: PropsFull) {
   const [places, setPlaces] = useState<Place[]>([])
   const [campsites, setCampsites] = useState<Place[]>([])
   const [paidCampsites, setPaidCampsites] = useState<Place[]>([])
@@ -188,41 +190,32 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     const bboxStr = `(${bbox.south},${bbox.west},${bbox.north},${bbox.east})`
     const qParts: string[] = []
 
-    // Progressive loading based on zoom level
+    // Progressive loading based on zoom level - but always show cities and towns
     if (bbox.zoom < 4) {
-      // Show nothing at very far zoom
+      // Show nothing at very far zoom (entire continent view)
       return
     } else if (bbox.zoom < 6) {
-      // At far zoom, show only major cities
+      // At far zoom, show only major cities with known large populations
       qParts.push(`node["place"="city"]["population"~"[0-9]{6,}"]${bboxStr};`)
     } else if (bbox.zoom < 8) {
-      // Show all cities and towns
+      // Show all cities and larger towns
       qParts.push(`node["place"="city"]${bboxStr};`)
       qParts.push(`node["place"="town"]${bboxStr};`)
-      // If small towns filter active, also fetch villages/hamlets
       if (smallTownsFilter) {
         qParts.push(`node["place"~"village|hamlet"]${bboxStr};`)
       }
-    } else if (bbox.zoom < 10) {
-      // Show cities, towns, and villages
-      qParts.push(`node["place"~"city|town|village"]${bboxStr};`)
-      // If small towns filter active, also fetch hamlets
-      if (smallTownsFilter) {
-        qParts.push(`node["place"="hamlet"]${bboxStr};`)
-      }
-    } else if (bbox.zoom < 12) {
-      // Show all towns and villages
-      qParts.push(`node["place"~"city|town|village"]${bboxStr};`)
-      // If small towns filter active, also fetch hamlets
-      if (smallTownsFilter) {
-        qParts.push(`node["place"="hamlet"]${bboxStr};`)
-      }
     } else {
-      // At closest zoom, show everything
-      qParts.push(`node["place"~"city|town|village|hamlet|suburb|locality"]${bboxStr};`)
-      qParts.push(`node["tourism"="attraction"]${bboxStr};`)
-      qParts.push(`way["tourism"="attraction"]${bboxStr};`)
-      qParts.push(`relation["tourism"="attraction"]${bboxStr};`)
+      // Zoom 8+: Show cities, towns, villages, and more
+      qParts.push(`node["place"~"city|town|village"]${bboxStr};`)
+      if (smallTownsFilter) {
+        qParts.push(`node["place"~"hamlet|locality"]${bboxStr};`)
+      }
+      // At zoom 12+, also show attractions
+      if (bbox.zoom >= 12) {
+        qParts.push(`node["tourism"="attraction"]${bboxStr};`)
+        qParts.push(`way["tourism"="attraction"]${bboxStr};`)
+        qParts.push(`relation["tourism"="attraction"]${bboxStr};`)
+      }
     }
 
     const query = `[out:json][timeout:25];(
@@ -587,7 +580,13 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
         return p.population >= 500 && p.population <= 10000
       }
       
-      // If no population data, exclude it (too uncertain)
+      // If no population data, still include villages and hamlets
+      // (these are typically small), but exclude cities and towns
+      // (which might be large but lack population data)
+      if (p.type === 'village' || p.type === 'hamlet' || p.type === 'locality') {
+        return true
+      }
+      
       return false
     })
   }, [places, showSmallTownsOnly])
@@ -608,8 +607,15 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
             <Marker key={p.id} position={[p.lat, p.lon]}>
               <Popup>
                 <div style={{ minWidth: 180 }}>
-                  <div style={{ fontWeight: 600 }}>{p.name}</div>
-                  <div style={{ color: '#475569', marginBottom: 8 }}>{p.type} · {p.lat.toFixed(3)}, {p.lon.toFixed(3)}</div>
+                  {(() => {
+                    const isVisited = visitedPlaces.some(vp => vp.id === p.id)
+                    return (
+                      <div style={{ fontWeight: 600, textDecoration: isVisited ? 'line-through' : 'none', opacity: isVisited ? 0.6 : 1 }}>
+                        {isVisited ? '\u2713 ' : ''}{p.name}
+                      </div>
+                    )
+                  })()}
+                  <div style={{ color: '#475569', marginBottom: 8 }}>{p.type} \u00b7 {p.lat.toFixed(3)}, {p.lon.toFixed(3)}</div>
                   <div style={{ marginBottom: 8 }}>
                     <a 
                       href={`https://www.meteoblue.com/en/weather/forecast/week/${p.lat.toFixed(4)}N${p.lon.toFixed(4)}E`}
@@ -657,9 +663,16 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
           <Marker key={c.id} position={[c.lat, c.lon]} icon={purpleIcon}>
             <Popup>
               <div style={{ minWidth: 180 }}>
-                <div style={{ fontWeight: 600 }}>🏕️ {c.name}</div>
+                {(() => {
+                  const isVisited = visitedPlaces.some(vp => vp.id === c.id)
+                  return (
+                    <div style={{ fontWeight: 600, textDecoration: isVisited ? 'line-through' : 'none', opacity: isVisited ? 0.6 : 1 }}>
+                      {isVisited ? '\u2713 ' : ''}\ud83c\udfd5\ufe0f {c.name}
+                    </div>
+                  )
+                })()}
                 <div style={{ color: '#475569', marginBottom: 8 }}>
-                  Free campsite · {c.lat.toFixed(3)}, {c.lon.toFixed(3)}
+                  Free campsite \u00b7 {c.lat.toFixed(3)}, {c.lon.toFixed(3)}
                 </div>
                 <div style={{ marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <a 
@@ -716,9 +729,16 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
           <Marker key={c.id} position={[c.lat, c.lon]} icon={greenIcon}>
             <Popup>
               <div style={{ minWidth: 180 }}>
-                <div style={{ fontWeight: 600 }}>🏕️💰 {c.name}</div>
+                {(() => {
+                  const isVisited = visitedPlaces.some(vp => vp.id === c.id)
+                  return (
+                    <div style={{ fontWeight: 600, textDecoration: isVisited ? 'line-through' : 'none', opacity: isVisited ? 0.6 : 1 }}>
+                      {isVisited ? '\u2713 ' : ''}\ud83c\udfd5\ufe0f\ud83d\udcb0 {c.name}
+                    </div>
+                  )
+                })()}
                 <div style={{ color: '#475569', marginBottom: 8 }}>
-                  Paid campsite · {c.lat.toFixed(3)}, {c.lon.toFixed(3)}
+                  Paid campsite \u00b7 {c.lat.toFixed(3)}, {c.lon.toFixed(3)}
                 </div>
                 <div style={{ marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <a 
