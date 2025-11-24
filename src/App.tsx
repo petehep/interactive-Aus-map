@@ -614,7 +614,7 @@ export default function App() {
               </span>
             )}
           </h2>
-          <div style={{ padding: 8, display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
+          <div style={{ padding: 8, display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
             <button 
               className="button" 
               onClick={() => setShowFuelStations(!showFuelStations)} 

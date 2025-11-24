@@ -27,6 +27,8 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   display: flex;
   flex-direction: column;
   min-width: 320px;
+  overflow-y: auto;
+  max-height: 100%;
 }
 .sidebar h2 {
   font-size: 16px;
@@ -277,5 +279,37 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   
   .sidebar {
     min-width: 380px;
+  }
+}
+
+/* Laptop screens - handle button wrapping better */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .main {
+    grid-template-columns: 1fr 340px;
+  }
+  
+  .sidebar {
+    min-width: 300px;
+  }
+  
+  /* Make sidebar button container wrap properly */
+  .sidebar > div[style*="padding: 8px"] {
+    flex-wrap: wrap !important;
+  }
+  
+  .sidebar > div[style*="padding: 8px"] button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+
+/* Medium laptop screens - better button layout */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .main {
+    grid-template-columns: 1fr 380px;
+  }
+  
+  .sidebar {
+    min-width: 340px;
   }
 }
