@@ -1,8 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState, useEffect } from 'react'
 import MapView, { Place } from './components/MapView'
 import Itinerary from './components/Itinerary'
 import Favorites from './components/Favorites'
 import VisitedPlaces from './components/VisitedPlaces'
+import Login from './components/Login'
+import { auth } from './firebase'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
 import type { LatLngTuple } from 'leaflet'
 
 export type ItineraryItem = Place & { addedAt: number }
@@ -23,6 +26,8 @@ type GeoResult = {
 }
 
 export default function App() {
+  const [user, setUser] = useState<any>(null)
+  const [authLoading, setAuthLoading] = useState(true)
   const [itinerary, setItinerary] = useState<ItineraryItem[]>([])
 
   const onAddPlace = useCallback((p: Place) => {
@@ -109,6 +114,23 @@ export default function App() {
   })
   const [showVisitedModal, setShowVisitedModal] = useState(false)
   const [mapRef, setMapRef] = useState<any>(null)
+
+  // Listen for authentication state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser)
+      setAuthLoading(false)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
 
   const unvisitPlace = useCallback((id: string) => {
     // Remove from visited places list
@@ -409,6 +431,32 @@ export default function App() {
   // Show dev URL when in dev mode to help local testing
   const devUrl = typeof window !== 'undefined' && (import.meta as any).env?.DEV ? window.location.origin : null
 
+  // Show loading screen while checking auth
+  if (authLoading) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#0f172a',
+        color: 'white',
+        fontSize: 18
+      }}>
+        Loading...
+      </div>
+    )
+  }
+
+  // Show login screen if not authenticated
+  if (!user) {
+    return <Login onLoginSuccess={() => {}} />
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -418,6 +466,9 @@ export default function App() {
             {summary}
             <div style={{ fontSize: 12, color: '#475569' }}>
               Start: {startLocation ? (startLocation.name ?? `${startLocation.lat.toFixed(3)}, ${startLocation.lon.toFixed(3)}`) : 'None'}
+            </div>
+            <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>
+              User: {user.email}
             </div>
             {devUrl && (
               <div className="devUrl" style={{ fontSize: 12, color: '#0f172a', marginTop: 6 }}>
@@ -599,6 +650,14 @@ export default function App() {
               style={{ backgroundColor: visitedPlaces.length > 0 ? '#10b981' : undefined }}
             >
               📍 Show Visits ({visitedPlaces.length})
+            </button>
+            <button 
+              className="button" 
+              onClick={handleLogout}
+              title="Sign out"
+              style={{ backgroundColor: '#ef4444' }}
+            >
+              Logout
             </button>
           </div>
           <Itinerary items={itinerary} onRemove={onRemove} />
