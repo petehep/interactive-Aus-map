@@ -24,6 +24,17 @@ export type Place = {
   population?: number
   visited?: boolean
   visitedAt?: number
+  attachments?: Attachment[]
+}
+
+export type Attachment = {
+  id: string
+  name: string
+  url: string
+  storagePath: string
+  type: string // MIME type
+  size: number
+  uploadedAt: number
 }
 
 type Props = {

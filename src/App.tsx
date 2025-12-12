@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react'
-import MapView, { Place } from './components/MapView'
+import MapView, { Place, Attachment } from './components/MapView'
 import Itinerary from './components/Itinerary'
 import Favorites from './components/Favorites'
 import VisitedPlaces from './components/VisitedPlaces'
@@ -19,6 +19,11 @@ import {
   migrateLocalStorageToFirestore,
   isMigrationComplete
 } from './services/firestoreService'
+import {
+  uploadAttachment,
+  deleteAttachment,
+  deleteAllAttachments
+} from './services/storageService'
 
 export type ItineraryItem = Place & { addedAt: number }
 
@@ -96,8 +101,57 @@ export default function App() {
 
   const removeFavorite = useCallback(async (id: string) => {
     if (!user) return
+    // Delete all attachments when removing a favorite
+    await deleteAllAttachments(user.uid, id)
     await deleteFavorite(user.uid, id)
   }, [user])
+
+  const handleUploadAttachment = useCallback(async (placeId: string, file: File) => {
+    if (!user) return
+
+    // Upload file to storage (with no-op progress for now; wire up if needed)
+    const attachment = await uploadAttachment(user.uid, placeId, file)
+
+    // Update favorite with new attachment
+    let favorite = favorites.find(f => f.id === placeId)
+    // If favorite doesn't exist (upload from itinerary), create a minimal favorite to store metadata
+    if (!favorite) {
+      const itineraryItem = itinerary.find(i => i.id === placeId)
+      if (!itineraryItem) return
+      favorite = { 
+        id: itineraryItem.id,
+        name: itineraryItem.name,
+        type: itineraryItem.type,
+        lat: itineraryItem.lat,
+        lon: itineraryItem.lon
+      } as Place
+    }
+
+    const updatedFavorite = {
+      ...favorite,
+      attachments: [...(favorite.attachments || []), attachment]
+    }
+
+    await saveFavorite(user.uid, updatedFavorite)
+  }, [user, favorites])
+
+  const handleDeleteAttachment = useCallback(async (placeId: string, attachment: Attachment) => {
+    if (!user) return
+
+    // Delete from storage
+    await deleteAttachment(attachment.storagePath)
+
+    // Update favorite to remove attachment
+    const favorite = favorites.find(f => f.id === placeId)
+    if (!favorite) return
+
+    const updatedFavorite = {
+      ...favorite,
+      attachments: (favorite.attachments || []).filter(a => a.id !== attachment.id)
+    }
+
+    await saveFavorite(user.uid, updatedFavorite)
+  }, [user, favorites])
 
   const toggleVisited = useCallback(async (id: string) => {
     if (!user) return
@@ -697,7 +751,14 @@ export default function App() {
               Logout
             </button>
           </div>
-          <Itinerary items={itinerary} onRemove={onRemove} onSetStart={onSetStart} startLocation={startLocation} />
+          <Itinerary 
+            items={itinerary} 
+            onRemove={onRemove} 
+            onSetStart={onSetStart} 
+            startLocation={startLocation}
+            onUploadAttachment={handleUploadAttachment}
+            onDeleteAttachment={handleDeleteAttachment}
+          />
           <div style={{ marginTop: 24 }}>
             <h2 style={{ margin: '0 0 12px 0', fontSize: 18, fontWeight: 600 }}>❤️ Favorites ({favorites.length})</h2>
             <Favorites 
@@ -706,6 +767,8 @@ export default function App() {
               onRemove={removeFavorite}
               onCenterMap={centerMap}
               onToggleVisited={toggleVisited}
+              onUploadAttachment={handleUploadAttachment}
+              onDeleteAttachment={handleDeleteAttachment}
             />
           </div>
         </aside>
