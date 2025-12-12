@@ -53,6 +53,7 @@ export default function App() {
   const [startQuery, setStartQuery] = useState('')
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [geocodeResults, setGeocodeResults] = useState<GeoResult[] | null>(null)
+  const [showWhatsNew, setShowWhatsNew] = useState(false)
   const [showFuelStations, setShowFuelStations] = useState(false)
   const [showDumpPoints, setShowDumpPoints] = useState(false)
   const [showWaterPoints, setShowWaterPoints] = useState(false)
@@ -551,21 +552,21 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <h1 style={{ fontSize: 18, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-          Australia Trip Scheduler
-          <span style={{
-            fontSize: 12,
-            padding: '2px 6px',
-            borderRadius: 999,
-            background: '#e2e8f0',
-            color: '#0f172a',
-            border: '1px solid #cbd5e1'
-          }} title="Version">
-            v4.0
-          </span>
-        </h1>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
           <div>
+            <h1 style={{ fontSize: 18, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+              Australia Trip Scheduler
+              <span style={{
+                fontSize: 12,
+                padding: '2px 6px',
+                borderRadius: 999,
+                background: '#e2e8f0',
+                color: '#0f172a',
+                border: '1px solid #cbd5e1'
+              }} title="Version">
+                v4.0
+              </span>
+            </h1>
             {summary}
             <div style={{ fontSize: 12, color: '#475569' }}>
               Start: {startLocation ? (startLocation.name ?? `${startLocation.lat.toFixed(3)}, ${startLocation.lon.toFixed(3)}`) : 'None'}
@@ -579,6 +580,25 @@ export default function App() {
               </div>
             )}
           </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <a 
+              className="button small" 
+              href="/interactive-Aus-map/user-manual.html" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              title="Open the latest User Manual"
+            >
+              📘 User Manual
+            </a>
+            <button 
+              className="button small"
+              title="See what's new in v4.0"
+              onClick={() => setShowWhatsNew(true)}
+            >
+              ✨ What's New
+            </button>
+          </div>
+        </div>
 
           <div style={{ position: 'relative', display: 'flex', gap: 8, alignItems: 'center' }}>
             <input
@@ -623,21 +643,21 @@ export default function App() {
             >
               {showCampsites ? 'Hide Camps' : 'Show Camps'}
             </button>
-                  <div style={{ position: 'relative' }}>
-                    {geocodeResults && (
-                      <div className="geocodePickOverlay">
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: 6 }}>
-                          <button className="button small" onClick={() => setGeocodeResults(null)}>Cancel</button>
-                        </div>
-                        {geocodeResults.map((r: any, i: number) => (
-                          <button key={i} className="geocodeItem" onClick={() => pickGeocode(r)}>
-                            <div style={{ fontSize: 13 }}>{r.name}</div>
-                            <div style={{ fontSize: 11, color: '#64748b' }}>{r.lat.toFixed(4)}, {r.lon.toFixed(4)}</div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+            <div style={{ position: 'relative' }}>
+              {geocodeResults && (
+                <div className="geocodePickOverlay">
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', padding: 6 }}>
+                    <button className="button small" onClick={() => setGeocodeResults(null)}>Cancel</button>
                   </div>
+                  {geocodeResults.map((r: any, i: number) => (
+                    <button key={i} className="geocodeItem" onClick={() => pickGeocode(r)}>
+                      <div style={{ fontSize: 13 }}>{r.name}</div>
+                      <div style={{ fontSize: 11, color: '#64748b' }}>{r.lat.toFixed(4)}, {r.lon.toFixed(4)}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <button className="button" onClick={updateRoute} disabled={isRouting || itinerary.length === 0}>
@@ -657,7 +677,6 @@ export default function App() {
           >
             {selectingStart ? 'Click map to set start (esc to cancel)' : 'Select start'}
           </button>
-        </div>
       </header>
       <main className="main">
         <div className="mapPane">
@@ -804,6 +823,38 @@ export default function App() {
           onUnvisit={unvisitPlace}
           onClose={() => setShowVisitedModal(false)}
         />
+      )}
+      {showWhatsNew && (
+        <div
+          className="modalOverlay"
+          onClick={() => setShowWhatsNew(false)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 9999
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ background: '#fff', borderRadius: 8, padding: 16, maxWidth: 520, width: '90%', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0 }}>What's New in v4.0</h3>
+              <button className="button small" onClick={() => setShowWhatsNew(false)}>Close</button>
+            </div>
+            <ul style={{ marginTop: 12 }}>
+              <li>📎 Attachments for Favorites: upload/view/download/delete photos, PDFs, and docs.</li>
+              <li>📎 Attachments for Itinerary stops with the same controls.</li>
+              <li>⏱️ Upload progress indicator for a smoother experience.</li>
+              <li>🔒 Secure Firebase Storage rules (10MB per file, allowed types only).</li>
+              <li>📘 New "User Manual" button that opens the latest manual.</li>
+              <li>⭐ Visible version badge in the header.</li>
+            </ul>
+            <div style={{ marginTop: 12 }}>
+              <a href="/interactive-Aus-map/user-manual.html" target="_blank" rel="noopener noreferrer" className="button">Read the Manual</a>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
