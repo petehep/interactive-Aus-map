@@ -1,6 +1,8 @@
 # Australia Trip Scheduler - User Manual
 
-Welcome to your Australia Trip Planning Companion! This app helps you plan, organize, and track your caravan or RV adventures across Australia.
+Welcome to your Australia Trip Planning Companion! This **free app** helps you plan, organize, and track your caravan or RV adventures across Australia.
+
+**🎉 Free for Everyone** - Just sign up and start planning your adventure!
 
 ---
 
@@ -35,27 +37,28 @@ The app works on:
 ### System Requirements
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 - Internet connection (required for maps and data)
-- Your friend has created an account for you!
+- Free account (sign up takes 30 seconds!)
 
 ---
 
 ## Signing In
 
-### First Time Login
+### First Time - Create Your Free Account
 
 1. **Open the app** in your web browser
 2. You'll see a **blue login screen**
-3. **Enter your email and password** (provided by your friend)
-4. Click **"Sign In"**
+3. Click **"Don't have an account? Sign Up"**
+4. Enter your **email address**
+5. Choose a **password** (minimum 6 characters)
+6. Click **"Sign Up"**
+7. You're ready to go!
 
-### Creating Your Own Account (Optional)
+### Returning Users - Sign In
 
-If you want your own account:
-1. Click **"Don't have an account? Sign Up"**
-2. Enter your **email address**
-3. Choose a **password** (minimum 6 characters)
-4. Click **"Sign Up"**
-5. You're ready to go!
+If you already have an account:
+1. Enter your **email and password**
+2. Click **"Sign In"**
+3. Your saved trips and favorites will load automatically
 
 ### Signing Out
 
@@ -575,10 +578,10 @@ A: Driving distances use real roads and are quite accurate. Actual time may vary
 A: No! Completely free. Just sign in and start planning.
 
 **Q: Can I change my password?**  
-A: Not in the app yet. Contact your friend who set up the account.
+A: Password reset feature coming soon. For now, create a new account if needed.
 
 **Q: My question isn't here!**  
-A: Ask your friend who shared this app with you, or report issues on GitHub.
+A: Report issues or ask questions on GitHub: https://github.com/petehep/interactive-Aus-map/issues
 
 ---
 
@@ -652,11 +655,15 @@ A: Ask your friend who shared this app with you, or report issues on GitHub.
 
 ## Support & Feedback
 
-**Having issues?** Ask your friend who shared the app with you.
+**Having issues?** Report bugs or ask questions on GitHub Issues.
 
-**Found a bug?** Report it on GitHub: https://github.com/petehep/interactive-Aus-map
+**Found a bug?** Report it here: https://github.com/petehep/interactive-Aus-map/issues
 
-**Love it?** Share the URL with other RV travelers (once they're set up with accounts)!
+**Love it?** Share the app with other travelers! It's free for everyone:
+- Post the URL: https://petehep.github.io/interactive-Aus-map/
+- Share in travel groups and forums
+- Tell your RV friends
+- No special setup needed - anyone can sign up!
 
 ---
 
@@ -676,4 +683,4 @@ Explore Australia at your own pace. From the red center to tropical coasts, from
 ---
 
 *Last Updated: December 12, 2025*  
-*Version: 3.0 (with Cloud Synchronization)*
+*Version: 3.1 (Public Access)*
