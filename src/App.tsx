@@ -551,7 +551,19 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <h1 style={{ fontSize: 18, margin: 0 }}>Australia Trip Scheduler</h1>
+        <h1 style={{ fontSize: 18, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+          Australia Trip Scheduler
+          <span style={{
+            fontSize: 12,
+            padding: '2px 6px',
+            borderRadius: 999,
+            background: '#e2e8f0',
+            color: '#0f172a',
+            border: '1px solid #cbd5e1'
+          }} title="Version">
+            v4.0
+          </span>
+        </h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div>
             {summary}
