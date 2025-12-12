@@ -618,15 +618,6 @@ export default function App() {
                 Clear start
               </button>
             )}
-            <a 
-              className="button small" 
-              href="/interactive-Aus-map/user-manual.html" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              title="Open the latest User Manual"
-            >
-              📘 User Manual
-            </a>
             <button 
               className="button small" 
               onClick={() => setShowSmallTownsOnly(!showSmallTownsOnly)} 
