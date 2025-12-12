@@ -7,6 +7,18 @@ import Login from './components/Login'
 import { auth } from './firebase'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import type { LatLngTuple } from 'leaflet'
+import {
+  saveFavorite,
+  deleteFavorite,
+  subscribeFavorites,
+  saveVisitedPlace,
+  deleteVisitedPlace,
+  subscribeVisitedPlaces,
+  saveItinerary,
+  subscribeItinerary,
+  migrateLocalStorageToFirestore,
+  isMigrationComplete
+} from './services/firestoreService'
 
 export type ItineraryItem = Place & { addedAt: number }
 
@@ -29,69 +41,6 @@ export default function App() {
   const [user, setUser] = useState<any>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [itinerary, setItinerary] = useState<ItineraryItem[]>([])
-
-  const onAddPlace = useCallback((p: Place) => {
-    setItinerary((prev) => {
-      if (prev.some((x) => x.id === p.id)) return prev
-      return [...prev, { ...p, addedAt: Date.now() }]
-    })
-  }, [])
-
-  const onRemove = useCallback((id: string) => {
-    setItinerary((prev) => prev.filter((x) => x.id !== id))
-  }, [])
-
-  const toggleFavorite = useCallback((place: Place) => {
-    setFavorites((prev) => {
-      const exists = prev.some((f) => f.id === place.id)
-      const updated = exists ? prev.filter((f) => f.id !== place.id) : [...prev, place]
-      localStorage.setItem('trip-favorites', JSON.stringify(updated))
-      return updated
-    })
-  }, [])
-
-  const removeFavorite = useCallback((id: string) => {
-    setFavorites(prev => {
-      const updated = prev.filter(f => f.id !== id)
-      localStorage.setItem('trip-favorites', JSON.stringify(updated))
-      return updated
-    })
-  }, [])
-
-  const toggleVisited = useCallback((id: string) => {
-    setFavorites(prev => {
-      const updated = prev.map(f => {
-        if (f.id === id) {
-          const newVisited = !f.visited
-          const place = { ...f, visited: newVisited, visitedAt: newVisited ? Date.now() : undefined }
-          
-          // Update visited places list
-          setVisitedPlaces(vp => {
-            if (newVisited) {
-              // Add to visited if not already there
-              if (!vp.some(p => p.id === id)) {
-                const updatedVisited = [...vp, place]
-                localStorage.setItem('trip-visited-places', JSON.stringify(updatedVisited))
-                return updatedVisited
-              }
-            } else {
-              // Remove from visited
-              const updatedVisited = vp.filter(p => p.id !== id)
-              localStorage.setItem('trip-visited-places', JSON.stringify(updatedVisited))
-              return updatedVisited
-            }
-            return vp
-          })
-          
-          return place
-        }
-        return f
-      })
-      localStorage.setItem('trip-favorites', JSON.stringify(updated))
-      return updated
-    })
-  }, [])
-
   const [route, setRoute] = useState<RouteResult>(null)
   const [startLocation, setStartLocation] = useState<{ lat: number; lon: number; name?: string } | undefined>(undefined)
   const [selectingStart, setSelectingStart] = useState(false)
@@ -104,25 +53,109 @@ export default function App() {
   const [showWaterPoints, setShowWaterPoints] = useState(false)
   const [showSmallTownsOnly, setShowSmallTownsOnly] = useState(false)
   const [showCampsites, setShowCampsites] = useState(true)
-  const [favorites, setFavorites] = useState<Place[]>(() => {
-    const stored = localStorage.getItem('trip-favorites')
-    return stored ? JSON.parse(stored) : []
-  })
-  const [visitedPlaces, setVisitedPlaces] = useState<Place[]>(() => {
-    const stored = localStorage.getItem('trip-visited-places')
-    return stored ? JSON.parse(stored) : []
-  })
+  const [favorites, setFavorites] = useState<Place[]>([])
+  const [visitedPlaces, setVisitedPlaces] = useState<Place[]>([])
   const [showVisitedModal, setShowVisitedModal] = useState(false)
   const [mapRef, setMapRef] = useState<any>(null)
 
-  // Listen for authentication state changes
+  const onAddPlace = useCallback((p: Place) => {
+    setItinerary((prev) => {
+      if (prev.some((x) => x.id === p.id)) return prev
+      const updated = [...prev, { ...p, addedAt: Date.now() }]
+      if (user) {
+        saveItinerary(user.uid, updated).catch(console.error)
+      }
+      return updated
+    })
+  }, [user])
+
+  const onRemove = useCallback((id: string) => {
+    setItinerary((prev) => {
+      const updated = prev.filter((x) => x.id !== id)
+      if (user) {
+        saveItinerary(user.uid, updated).catch(console.error)
+      }
+      return updated
+    })
+  }, [user])
+
+  const toggleFavorite = useCallback(async (place: Place) => {
+    if (!user) return
+    
+    const exists = favorites.some((f) => f.id === place.id)
+    if (exists) {
+      await deleteFavorite(user.uid, place.id)
+    } else {
+      await saveFavorite(user.uid, place)
+    }
+  }, [user, favorites])
+
+  const removeFavorite = useCallback(async (id: string) => {
+    if (!user) return
+    await deleteFavorite(user.uid, id)
+  }, [user])
+
+  const toggleVisited = useCallback(async (id: string) => {
+    if (!user) return
+    
+    const favorite = favorites.find(f => f.id === id)
+    if (!favorite) return
+    
+    const isCurrentlyVisited = visitedPlaces.some(p => p.id === id)
+    
+    if (isCurrentlyVisited) {
+      // Unvisit
+      await deleteVisitedPlace(user.uid, id)
+      // Update favorite
+      await saveFavorite(user.uid, { ...favorite, visited: false, visitedAt: undefined })
+    } else {
+      // Visit
+      const visitedPlace = { ...favorite, visited: true, visitedAt: Date.now() }
+      await saveVisitedPlace(user.uid, visitedPlace)
+      // Update favorite
+      await saveFavorite(user.uid, visitedPlace)
+    }
+  }, [user, favorites, visitedPlaces])
+
+  // Listen for authentication state changes and set up Firestore subscriptions
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser)
       setAuthLoading(false)
+      
+      if (currentUser) {
+        // Check if we need to migrate localStorage data
+        if (!isMigrationComplete()) {
+          console.log('Migrating localStorage data to Firestore...')
+          await migrateLocalStorageToFirestore(currentUser.uid)
+        }
+      }
     })
     return () => unsubscribe()
   }, [])
+
+  // Subscribe to Firestore data when user is logged in
+  useEffect(() => {
+    if (!user) return
+
+    const unsubFavorites = subscribeFavorites(user.uid, (favorites) => {
+      setFavorites(favorites)
+    })
+
+    const unsubVisited = subscribeVisitedPlaces(user.uid, (visited) => {
+      setVisitedPlaces(visited)
+    })
+
+    const unsubItinerary = subscribeItinerary(user.uid, (items) => {
+      setItinerary(items)
+    })
+
+    return () => {
+      unsubFavorites()
+      unsubVisited()
+      unsubItinerary()
+    }
+  }, [user])
 
   const handleLogout = async () => {
     try {
@@ -132,23 +165,18 @@ export default function App() {
     }
   }
 
-  const unvisitPlace = useCallback((id: string) => {
-    // Remove from visited places list
-    setVisitedPlaces(prev => {
-      const updated = prev.filter(p => p.id !== id)
-      localStorage.setItem('trip-visited-places', JSON.stringify(updated))
-      return updated
-    })
+  const unvisitPlace = useCallback(async (id: string) => {
+    if (!user) return
+    
+    // Remove from visited places
+    await deleteVisitedPlace(user.uid, id)
     
     // Also update in favorites if it exists there
-    setFavorites(prev => {
-      const updated = prev.map(f => 
-        f.id === id ? { ...f, visited: false, visitedAt: undefined } : f
-      )
-      localStorage.setItem('trip-favorites', JSON.stringify(updated))
-      return updated
-    })
-  }, [])
+    const favorite = favorites.find(f => f.id === id)
+    if (favorite) {
+      await saveFavorite(user.uid, { ...favorite, visited: false, visitedAt: undefined })
+    }
+  }, [user, favorites])
 
   const centerMap = useCallback((lat: number, lon: number) => {
     if (mapRef) {
@@ -220,7 +248,10 @@ export default function App() {
     if (!window.confirm('Clear all itinerary stops? This cannot be undone.')) return
     setItinerary([])
     setRoute(null)
-  }, [itinerary])
+    if (user) {
+      saveItinerary(user.uid, []).catch(console.error)
+    }
+  }, [itinerary, user])
 
   // Auto-compute route after loading itinerary from file
   React.useEffect(() => {
