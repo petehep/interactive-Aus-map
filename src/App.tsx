@@ -79,6 +79,10 @@ export default function App() {
     })
   }, [user])
 
+  const onSetStart = useCallback((item: ItineraryItem) => {
+    setStartLocation({ lat: item.lat, lon: item.lon, name: item.name })
+  }, [])
+
   const toggleFavorite = useCallback(async (place: Place) => {
     if (!user) return
     
@@ -693,7 +697,7 @@ export default function App() {
               Logout
             </button>
           </div>
-          <Itinerary items={itinerary} onRemove={onRemove} />
+          <Itinerary items={itinerary} onRemove={onRemove} onSetStart={onSetStart} startLocation={startLocation} />
           <div style={{ marginTop: 24 }}>
             <h2 style={{ margin: '0 0 12px 0', fontSize: 18, fontWeight: 600 }}>❤️ Favorites ({favorites.length})</h2>
             <Favorites 
