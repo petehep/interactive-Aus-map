@@ -52,14 +52,65 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
 }
 .itineraryItem small { color: #334155; }
 .button {
-  background: #0ea5e9;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
   color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
+  border: 2px solid #0369a1;
+  border-top: 2px solid #06b6d4;
+  border-left: 2px solid #06b6d4;
+  border-radius: 8px;
+  padding: 8px 12px;
   cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.3),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 6px;
+  margin-bottom: 4px;
 }
-.button:disabled { opacity: 0.5; cursor: default; }
+
+.button:hover {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.5), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.4),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+  border-top: 2px solid #22d3ee;
+  border-left: 2px solid #22d3ee;
+}
+
+.button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(14, 165, 233, 0.3), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.3),
+              inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  border-top: 2px solid #0369a1;
+  border-left: 2px solid #0369a1;
+}
+
+.button:disabled { 
+  opacity: 0.5; 
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.15),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.button:disabled:hover {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.15),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.1);
+  transform: none;
+  border-top: 2px solid #06b6d4;
+  border-left: 2px solid #06b6d4;
+}
 
 /* Ensure Leaflet popups and controls accept pointer events (fixes unclickable popup buttons) */
 .leaflet-container .leaflet-popup-pane,
@@ -91,10 +142,25 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
 
 /* Start input style */
 .startInput {
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
   min-width: 220px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
+}
+
+.startInput:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1), 0 2px 4px rgba(15, 23, 42, 0.05);
+}
+
+.startInput:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 
 .devUrl a { color: #0ea5e9; text-decoration: none }
@@ -128,17 +194,44 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   z-index: 2000;
 }
 
-.button.small { padding: 4px 8px; font-size: 12px; }
+.button.small { 
+  padding: 6px 10px; 
+  font-size: 12px;
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  border: 2px solid #334155;
+  border-top: 2px solid #94a3b8;
+  border-left: 2px solid #94a3b8;
+  box-shadow: 0 5px 14px rgba(71, 85, 105, 0.35), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.2),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+}
+
+.button.small:hover {
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  box-shadow: 0 7px 18px rgba(71, 85, 105, 0.45), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.25),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+  border-top: 2px solid #cbd5e1;
+  border-left: 2px solid #cbd5e1;
+}
 .geocodeItem {
   display: block;
-  padding: 8px 10px;
+  padding: 10px 12px;
   width: 100%;
   text-align: left;
   border: none;
   background: transparent;
   cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 13px;
 }
-.geocodeItem:hover { background: #f1f5f9 }
+.geocodeItem:hover { 
+  background: linear-gradient(90deg, #f0f9ff 0%, #f1f5f9 100%);
+  padding-left: 14px;
+}
+.geocodeItem:active {
+  background: #e0f2fe;
+}
 
 /* Purple marker styling for free campsites */
 .purple-marker {
