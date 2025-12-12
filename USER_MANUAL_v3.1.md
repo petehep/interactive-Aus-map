@@ -6,6 +6,23 @@ Welcome to your Australia Trip Planning Companion! This **free app** helps you p
 
 ---
 
+## ⚠️ Important Notice - Please Read
+
+**This is a personal hobby project, not a commercial product.**
+
+I created this app for fun and to share with the travel community. Here's what you should know:
+
+- **Free & Casual** - This is currently free to use, but that might change in the future
+- **No Guarantees** - The app might stop working, change significantly, or even disappear entirely
+- **Hobby Project** - I'm not a professional app developer, just an enthusiast sharing something useful
+- **Use at Your Own Risk** - No warranties, no guarantees, no commitments
+- **Feature Requests Welcome** - Feel free to suggest features, but please don't be upset if I don't add them
+- **Best Effort** - I'll try to keep it running, but life happens and priorities change
+
+**Bottom Line:** Enjoy it while it's here, but don't rely on it for critical trip planning. Always have backup plans and offline maps!
+
+---
+
 ## Table of Contents
 1. [Getting Started](#getting-started)
 2. [Signing In](#signing-in)
