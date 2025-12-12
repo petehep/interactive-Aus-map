@@ -13,9 +13,15 @@ import { db } from '../firebase'
 import type { Place } from '../components/MapView'
 import type { ItineraryItem } from '../App'
 
+// Sanitize IDs - Firestore document IDs can't contain slashes
+// Replace slashes with underscores
+function sanitizeId(id: string): string {
+  return id.replace(/\//g, '_')
+}
+
 // Favorites
 export async function saveFavorite(userId: string, place: Place) {
-  const favoriteRef = doc(db, `users/${userId}/favorites`, place.id)
+  const favoriteRef = doc(db, `users/${userId}/favorites`, sanitizeId(place.id))
   await setDoc(favoriteRef, {
     ...place,
     updatedAt: Date.now()
@@ -23,7 +29,7 @@ export async function saveFavorite(userId: string, place: Place) {
 }
 
 export async function deleteFavorite(userId: string, placeId: string) {
-  const favoriteRef = doc(db, `users/${userId}/favorites`, placeId)
+  const favoriteRef = doc(db, `users/${userId}/favorites`, sanitizeId(placeId))
   await deleteDoc(favoriteRef)
 }
 
@@ -46,7 +52,7 @@ export function subscribeFavorites(
 
 // Visited Places
 export async function saveVisitedPlace(userId: string, place: Place) {
-  const visitedRef = doc(db, `users/${userId}/visited`, place.id)
+  const visitedRef = doc(db, `users/${userId}/visited`, sanitizeId(place.id))
   await setDoc(visitedRef, {
     ...place,
     visitedAt: place.visitedAt || Date.now(),
@@ -55,7 +61,7 @@ export async function saveVisitedPlace(userId: string, place: Place) {
 }
 
 export async function deleteVisitedPlace(userId: string, placeId: string) {
-  const visitedRef = doc(db, `users/${userId}/visited`, placeId)
+  const visitedRef = doc(db, `users/${userId}/visited`, sanitizeId(placeId))
   await deleteDoc(visitedRef)
 }
 
