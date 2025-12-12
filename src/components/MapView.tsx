@@ -639,7 +639,13 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                       return (
                         <button
                           className="button"
-                          onClick={() => toggleFavorite(p)}
+                          onClick={async () => {
+                            try {
+                              await toggleFavorite(p)
+                            } catch (error) {
+                              console.error('Error toggling favorite:', error)
+                            }
+                          }}
                           style={{ background: isFavorite ? '#ec4899' : undefined }}
                           title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                         >
@@ -705,7 +711,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                     return (
                       <button
                         className="button"
-                        onClick={() => toggleFavorite(c)}
+                        onClick={async () => { try { await toggleFavorite(c) } catch (error) { console.error("Error toggling favorite:", error) } }}
                         style={{ background: isFavorite ? '#ec4899' : undefined }}
                         title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                       >
@@ -771,7 +777,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                     return (
                       <button
                         className="button"
-                        onClick={() => toggleFavorite(c)}
+                        onClick={async () => { try { await toggleFavorite(c) } catch (error) { console.error("Error toggling favorite:", error) } }}
                         style={{ background: isFavorite ? '#ec4899' : undefined }}
                         title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                       >
