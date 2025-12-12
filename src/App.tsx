@@ -106,8 +106,9 @@ export default function App() {
     if (isCurrentlyVisited) {
       // Unvisit
       await deleteVisitedPlace(user.uid, id)
-      // Update favorite
-      await saveFavorite(user.uid, { ...favorite, visited: false, visitedAt: undefined })
+      // Update favorite - remove visited fields
+      const { visited, visitedAt, ...cleanFavorite } = favorite
+      await saveFavorite(user.uid, { ...cleanFavorite, visited: false })
     } else {
       // Visit
       const visitedPlace = { ...favorite, visited: true, visitedAt: Date.now() }
@@ -174,7 +175,8 @@ export default function App() {
     // Also update in favorites if it exists there
     const favorite = favorites.find(f => f.id === id)
     if (favorite) {
-      await saveFavorite(user.uid, { ...favorite, visited: false, visitedAt: undefined })
+      const { visited, visitedAt, ...cleanFavorite } = favorite
+      await saveFavorite(user.uid, { ...cleanFavorite, visited: false })
     }
   }, [user, favorites])
 
