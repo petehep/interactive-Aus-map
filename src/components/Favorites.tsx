@@ -154,7 +154,13 @@ export default function Favorites({ favorites, onAddToItinerary, onRemove, onCen
                 </button>
                 <button
                   className="button small"
-                  onClick={() => onToggleVisited(place.id)}
+                  onClick={async () => {
+                    try {
+                      await onToggleVisited(place.id)
+                    } catch (error) {
+                      console.error('Error toggling visited status:', error)
+                    }
+                  }}
                   title={place.visited ? 'Mark as unvisited' : 'Mark as visited'}
                   style={{ fontSize: 11, padding: '4px 8px', background: place.visited ? '#10b981' : '#6b7280' }}
                 >
