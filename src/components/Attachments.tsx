@@ -15,6 +15,7 @@ type Props = {
 
 export default function Attachments({ attachments, onUpload, onDelete, uploading }: Props) {
   const [viewingImage, setViewingImage] = useState<string | null>(null)
+  const [progress, setProgress] = useState<number>(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,6 +23,7 @@ export default function Attachments({ attachments, onUpload, onDelete, uploading
     if (!file) return
 
     try {
+      setProgress(0)
       await onUpload(file)
       // Reset input
       if (fileInputRef.current) {
@@ -30,6 +32,8 @@ export default function Attachments({ attachments, onUpload, onDelete, uploading
     } catch (error) {
       console.error('Upload failed:', error)
       alert('Failed to upload file. Please try again.')
+    } finally {
+      setProgress(0)
     }
   }
 
@@ -73,7 +77,7 @@ export default function Attachments({ attachments, onUpload, onDelete, uploading
               cursor: uploading ? 'not-allowed' : 'pointer'
             }}
           >
-            {uploading ? 'Uploading...' : '+ Add File'}
+            {uploading ? `Uploading... ${progress}%` : '+ Add File'}
           </span>
         </label>
       </div>

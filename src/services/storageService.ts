@@ -1,10 +1,11 @@
 import { storage } from '../firebase'
 import { 
   ref, 
-  uploadBytes, 
+  uploadBytesResumable, 
   getDownloadURL, 
   deleteObject,
-  listAll 
+  listAll,
+  UploadTask
 } from 'firebase/storage'
 import type { Attachment } from '../components/MapView'
 
@@ -18,7 +19,8 @@ import type { Attachment } from '../components/MapView'
 export async function uploadAttachment(
   userId: string,
   placeId: string,
-  file: File
+  file: File,
+  onProgress?: (percent: number) => void
 ): Promise<Attachment> {
   // Create unique file path: users/{userId}/places/{placeId}/{timestamp}_{filename}
   const timestamp = Date.now()
@@ -27,11 +29,20 @@ export async function uploadAttachment(
   
   const storageRef = ref(storage, storagePath)
   
-  // Upload file
-  const snapshot = await uploadBytes(storageRef, file)
+  // Upload file with resumable task to report progress
+  const task: UploadTask = uploadBytesResumable(storageRef, file)
+  
+  await new Promise<void>((resolve, reject) => {
+    task.on('state_changed', (snapshot) => {
+      if (onProgress) {
+        const percent = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        onProgress(Math.round(percent))
+      }
+    }, reject, () => resolve())
+  })
   
   // Get download URL
-  const url = await getDownloadURL(snapshot.ref)
+  const url = await getDownloadURL(task.snapshot.ref)
   
   // Return attachment metadata
   return {

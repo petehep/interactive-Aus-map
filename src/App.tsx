@@ -109,12 +109,23 @@ export default function App() {
   const handleUploadAttachment = useCallback(async (placeId: string, file: File) => {
     if (!user) return
 
-    // Upload file to storage
+    // Upload file to storage (with no-op progress for now; wire up if needed)
     const attachment = await uploadAttachment(user.uid, placeId, file)
 
     // Update favorite with new attachment
-    const favorite = favorites.find(f => f.id === placeId)
-    if (!favorite) return
+    let favorite = favorites.find(f => f.id === placeId)
+    // If favorite doesn't exist (upload from itinerary), create a minimal favorite to store metadata
+    if (!favorite) {
+      const itineraryItem = itinerary.find(i => i.id === placeId)
+      if (!itineraryItem) return
+      favorite = { 
+        id: itineraryItem.id,
+        name: itineraryItem.name,
+        type: itineraryItem.type,
+        lat: itineraryItem.lat,
+        lon: itineraryItem.lon
+      } as Place
+    }
 
     const updatedFavorite = {
       ...favorite,
@@ -740,7 +751,14 @@ export default function App() {
               Logout
             </button>
           </div>
-          <Itinerary items={itinerary} onRemove={onRemove} onSetStart={onSetStart} startLocation={startLocation} />
+          <Itinerary 
+            items={itinerary} 
+            onRemove={onRemove} 
+            onSetStart={onSetStart} 
+            startLocation={startLocation}
+            onUploadAttachment={handleUploadAttachment}
+            onDeleteAttachment={handleDeleteAttachment}
+          />
           <div style={{ marginTop: 24 }}>
             <h2 style={{ margin: '0 0 12px 0', fontSize: 18, fontWeight: 600 }}>❤️ Favorites ({favorites.length})</h2>
             <Favorites 

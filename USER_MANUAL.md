@@ -14,8 +14,9 @@ Welcome to your Australia Trip Planning Companion! This app helps you plan, orga
 7. [Tracking Visited Places](#tracking-visited-places)
 8. [Finding Essential Services](#finding-essential-services)
 9. [Weather Information](#weather-information)
-10. [Tips & Tricks](#tips--tricks)
-11. [Troubleshooting](#troubleshooting)
+10. [Attachments](#attachments)
+11. [Tips & Tricks](#tips--tricks)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -198,6 +199,34 @@ Click on any campsite marker to see:
 ---
 
 ## Managing Favorites
+## Attachments
+
+You can attach important files to places, like booking confirmations, campsite maps, and photos. Attachments are stored securely and sync across your devices.
+
+### Add an Attachment
+1. Add a place to **Favorites** (click ❤️ in the map popup)
+2. Scroll to the **Favorites** panel
+3. Find your place and look for **📎 Attachments (0)**
+4. Click **+ Add File** and choose an image, PDF, or document (max 10MB)
+
+### View / Download / Delete
+- Click **👁️ View** to preview images in full screen
+- Click **⬇️ Download** to save locally
+- Click **🗑️ Delete** to remove the file
+
+### Attachments for Itinerary Stops
+You can also manage attachments directly from your **Itinerary** list. Each stop includes an attachments section with the same controls.
+
+### Supported File Types
+- Images (JPG, PNG, GIF, WebP)
+- PDFs (booking confirmations, maps)
+- Documents (Word, Excel, PowerPoint)
+- Text files
+
+### Storage & Privacy
+- Files are private to your account
+- Attachments are stored in the cloud and available on any device after login
+
 
 Favorites let you save places you want to remember or visit later.
 
