@@ -157,16 +157,19 @@ Places you've marked as visited show:
 ### Step 3: Calculate Your Route
 
 Once you've added 2 or more places:
-1. A **blue line** appears on the map automatically
-2. This shows your **driving route**
-3. The route **updates automatically** when you add/remove places
+1. Click the **"Update Route"** button (in the Itinerary section)
+2. Wait a few seconds for the route to calculate
+3. A **blue line** appears on the map showing your **driving route**
+4. Distances and driving times appear in your itinerary
+
+**Important:** The route does NOT update automatically - you must click **"Update Route"** each time you add or remove places!
 
 ### Managing Your Itinerary
 
 **Removing a Stop:**
 1. Find the place in your **Itinerary list** (left sidebar)
 2. Click the **"Remove"** button next to it
-3. The route recalculates automatically
+3. Click **"Update Route"** to recalculate the route with the removed stop
 
 **Clearing Everything:**
 1. Click **"Clear Itinerary"** button
@@ -530,10 +533,11 @@ For filling fresh water tanks.
 
 **Try:**
 1. Make sure you have **at least 2 stops** in itinerary
-2. Check your **internet connection**
-3. Wait 5-10 seconds (routing takes time)
-4. Remove and re-add the last stop
-5. Refresh the page
+2. Click the **"Update Route"** button (don't wait for automatic update - it doesn't auto-update!)
+3. Check your **internet connection**
+4. Wait 5-10 seconds after clicking Update Route (routing takes time)
+5. If still not working, remove and re-add the last stop, then click Update Route again
+6. Refresh the page as a last resort
 
 ### "I can't see places I added"
 
