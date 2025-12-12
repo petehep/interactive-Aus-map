@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react'
-import MapView, { Place } from './components/MapView'
+import MapView, { Place, Attachment } from './components/MapView'
 import Itinerary from './components/Itinerary'
 import Favorites from './components/Favorites'
 import VisitedPlaces from './components/VisitedPlaces'
@@ -19,6 +19,11 @@ import {
   migrateLocalStorageToFirestore,
   isMigrationComplete
 } from './services/firestoreService'
+import {
+  uploadAttachment,
+  deleteAttachment,
+  deleteAllAttachments
+} from './services/storageService'
 
 export type ItineraryItem = Place & { addedAt: number }
 
@@ -96,8 +101,46 @@ export default function App() {
 
   const removeFavorite = useCallback(async (id: string) => {
     if (!user) return
+    // Delete all attachments when removing a favorite
+    await deleteAllAttachments(user.uid, id)
     await deleteFavorite(user.uid, id)
   }, [user])
+
+  const handleUploadAttachment = useCallback(async (placeId: string, file: File) => {
+    if (!user) return
+
+    // Upload file to storage
+    const attachment = await uploadAttachment(user.uid, placeId, file)
+
+    // Update favorite with new attachment
+    const favorite = favorites.find(f => f.id === placeId)
+    if (!favorite) return
+
+    const updatedFavorite = {
+      ...favorite,
+      attachments: [...(favorite.attachments || []), attachment]
+    }
+
+    await saveFavorite(user.uid, updatedFavorite)
+  }, [user, favorites])
+
+  const handleDeleteAttachment = useCallback(async (placeId: string, attachment: Attachment) => {
+    if (!user) return
+
+    // Delete from storage
+    await deleteAttachment(attachment.storagePath)
+
+    // Update favorite to remove attachment
+    const favorite = favorites.find(f => f.id === placeId)
+    if (!favorite) return
+
+    const updatedFavorite = {
+      ...favorite,
+      attachments: (favorite.attachments || []).filter(a => a.id !== attachment.id)
+    }
+
+    await saveFavorite(user.uid, updatedFavorite)
+  }, [user, favorites])
 
   const toggleVisited = useCallback(async (id: string) => {
     if (!user) return
@@ -706,6 +749,8 @@ export default function App() {
               onRemove={removeFavorite}
               onCenterMap={centerMap}
               onToggleVisited={toggleVisited}
+              onUploadAttachment={handleUploadAttachment}
+              onDeleteAttachment={handleDeleteAttachment}
             />
           </div>
         </aside>

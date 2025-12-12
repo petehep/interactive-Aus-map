@@ -1,4 +1,6 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
+import Attachments from './Attachments'
+import type { Attachment } from './MapView'
 
 type Place = {
   id: string
@@ -8,6 +10,7 @@ type Place = {
   lon: number
   population?: number
   visited?: boolean
+  attachments?: Attachment[]
 }
 
 type Props = {
@@ -16,6 +19,8 @@ type Props = {
   onRemove: (id: string) => void
   onCenterMap: (lat: number, lon: number) => void
   onToggleVisited: (id: string) => void
+  onUploadAttachment: (placeId: string, file: File) => Promise<void>
+  onDeleteAttachment: (placeId: string, attachment: Attachment) => Promise<void>
 }
 
 // Australian states/territories with their approximate boundaries
@@ -56,7 +61,9 @@ const stateNames: Record<string, string> = {
   'ACT': 'Australian Capital Territory'
 }
 
-export default function Favorites({ favorites, onAddToItinerary, onRemove, onCenterMap, onToggleVisited }: Props) {
+export default function Favorites({ favorites, onAddToItinerary, onRemove, onCenterMap, onToggleVisited, onUploadAttachment, onDeleteAttachment }: Props) {
+  const [uploadingFor, setUploadingFor] = useState<string | null>(null)
+  
   const groupedByState = useMemo(() => {
     const groups: Record<string, Place[]> = {}
     
@@ -175,6 +182,21 @@ export default function Favorites({ favorites, onAddToItinerary, onRemove, onCen
                   ✕
                 </button>
               </div>
+              
+              {/* Attachments section */}
+              <Attachments
+                attachments={place.attachments || []}
+                onUpload={async (file) => {
+                  setUploadingFor(place.id)
+                  try {
+                    await onUploadAttachment(place.id, file)
+                  } finally {
+                    setUploadingFor(null)
+                  }
+                }}
+                onDelete={(attachment) => onDeleteAttachment(place.id, attachment)}
+                uploading={uploadingFor === place.id}
+              />
             </div>
           ))}
         </div>
