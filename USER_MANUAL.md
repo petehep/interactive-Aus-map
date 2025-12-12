@@ -64,7 +64,7 @@ When you're done:
 2. Find the **red "Logout" button** at the bottom
 3. Click it to sign out
 
-**Your data is saved automatically** - you can close the browser and come back anytime!
+**Your data is saved automatically to the cloud** - you can close the browser, switch devices, and come back anytime!
 
 ---
 
@@ -456,15 +456,17 @@ For filling fresh water tanks.
 
 ### Saving Your Work
 
-**Automatic Saving:**
-- Favorites save automatically ✓
-- Visited places save automatically ✓
-- Itineraries save automatically ✓
+**Automatic Cloud Saving:**
+- Favorites save automatically to the cloud ✓
+- Visited places save automatically to the cloud ✓
+- Itineraries save automatically to the cloud ✓
 
-**BUT:** Your data is stored on **each device separately**
-- Phone favorites ≠ Computer favorites
-- Use the **same device** for continuity
-- Or copy places to your other devices
+**Multi-Device Sync:**
+- Your data syncs **across ALL your devices** automatically!
+- Phone favorites = Computer favorites = Tablet favorites
+- Log in on any device to see your data
+- Changes sync in real-time (within seconds)
+- **Example:** Add a favorite on your phone, see it immediately on your computer!
 
 ---
 
@@ -521,13 +523,15 @@ For filling fresh water tanks.
 ### "I lost my favorites!"
 
 **Possible Causes:**
-1. **Different device** - Each device stores separately
-2. **Cleared browser data** - Favorites are in browser storage
-3. **Different browser** - Chrome ≠ Safari ≠ Firefox
+1. **Different account** - Make sure you're logged into the same account
+2. **Not logged in** - Sign in to see your cloud-saved data
+3. **Internet connection** - Cloud sync requires internet
 
-**Prevention:**
-- Use the same device and browser consistently
-- Export important places to a note (future feature!)
+**The Good News:**
+- Your data is safely stored in the cloud
+- Log in on **any device** to access everything
+- Data syncs automatically across all your devices
+- No longer limited to one device or browser!
 
 ### "Login isn't working"
 
@@ -543,6 +547,8 @@ For filling fresh water tanks.
 - Your favorites are private
 - Your visited places are private
 - Your itineraries are private
+- Data is protected by secure authentication
+- Only you can access your trip data
 
 **In the future:** Sharing features may be added!
 
@@ -551,7 +557,7 @@ For filling fresh water tanks.
 ## Frequently Asked Questions
 
 **Q: Does this work offline?**  
-A: No, internet required for maps and data. Download offline maps with another app if needed.
+A: No, internet required for maps, data, and cloud synchronization. Download offline maps with another app if needed.
 
 **Q: Can I print my itinerary?**  
 A: Not yet, but you can screenshot the itinerary section or manually write it down.
@@ -669,5 +675,5 @@ Explore Australia at your own pace. From the red center to tropical coasts, from
 
 ---
 
-*Last Updated: November 24, 2025*  
-*Version: 2.0 (with Authentication)*
+*Last Updated: December 12, 2025*  
+*Version: 3.0 (with Cloud Synchronization)*
