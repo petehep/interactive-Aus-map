@@ -243,7 +243,11 @@ Favorites let you save places you want to remember or visit later.
 **View in Google Maps:**
 1. Click **"Google Maps"** link
 2. Opens the location in Google Maps
-3. Great for street view, directions, or photos!
+3. **Send to your phone for navigation:**
+   - In Google Maps, click **"Send to your phone"**
+   - Or click **"Directions"** to start sat nav
+   - Perfect for turn-by-turn navigation while driving!
+4. Also great for street view, reviews, or photos!
 
 **Add to Itinerary:**
 1. Click **"Add to Itinerary"** button
@@ -456,6 +460,13 @@ For filling fresh water tanks.
 - Use **two fingers** to zoom
 - **Rotate with two fingers** if needed
 - **Tap and hold** to see place details
+
+**Pro Tip - Use with Your Phone's Navigation:**
+1. Find a place in your **Favorites**
+2. Click **"Google Maps"** link
+3. In Google Maps, click **"Send to your phone"**
+4. Your phone gets the location for turn-by-turn navigation
+5. Perfect for driving to campsites or attractions!
 
 ### Saving Your Work
 
