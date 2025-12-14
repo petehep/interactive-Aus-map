@@ -7,12 +7,13 @@ type Props = {
   items: ItineraryItem[]
   onRemove: (id: string) => void
   onSetStart: (item: ItineraryItem) => void
+  onClearStart: () => void
   onUploadAttachment: (placeId: string, file: File) => Promise<void>
   onDeleteAttachment: (placeId: string, attachment: Attachment) => Promise<void>
   startLocation?: { lat: number; lon: number; name?: string }
 }
 
-export default function Itinerary({ items, onRemove, onSetStart, onUploadAttachment, onDeleteAttachment, startLocation }: Props) {
+export default function Itinerary({ items, onRemove, onSetStart, onClearStart, onUploadAttachment, onDeleteAttachment, startLocation }: Props) {
   const [uploadingFor, setUploadingFor] = useState<string | null>(null)
   if (!items.length) {
     return (
@@ -37,8 +38,12 @@ export default function Itinerary({ items, onRemove, onSetStart, onUploadAttachm
               <small>{it.type} · {it.lat.toFixed(3)}, {it.lon.toFixed(3)}</small>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="button" onClick={() => onSetStart(it)}>Make Start</button>
-              <button className="button" onClick={() => onRemove(it.id)}>Remove</button>
+              {isStart ? (
+                <button className="button" onClick={onClearStart}>Clear From Start</button>
+              ) : !startLocation && (
+                <button className="button" onClick={() => onSetStart(it)}>Make Start</button>
+              )}
+              <button className="button" onClick={() => onRemove(it.id)}>Remove From Itinerary</button>
             </div>
             <div style={{ marginTop: 8 }}>
               <Attachments

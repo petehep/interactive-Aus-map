@@ -3,6 +3,7 @@ import MapView, { Place, Attachment } from './components/MapView'
 import Itinerary from './components/Itinerary'
 import Favorites from './components/Favorites'
 import VisitedPlaces from './components/VisitedPlaces'
+import ShareItinerary from './components/ShareItinerary'
 import Login from './components/Login'
 import { auth } from './firebase'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
@@ -24,6 +25,7 @@ import {
   deleteAttachment,
   deleteAllAttachments
 } from './services/storageService'
+import { getSharedRouteFromUrl } from './services/routeShareService'
 
 export type ItineraryItem = Place & { addedAt: number }
 
@@ -62,6 +64,7 @@ export default function App() {
   const [favorites, setFavorites] = useState<Place[]>([])
   const [visitedPlaces, setVisitedPlaces] = useState<Place[]>([])
   const [showVisitedModal, setShowVisitedModal] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
   const [mapRef, setMapRef] = useState<any>(null)
 
   const onAddPlace = useCallback((p: Place) => {
@@ -176,6 +179,31 @@ export default function App() {
       await saveFavorite(user.uid, visitedPlace)
     }
   }, [user, favorites, visitedPlaces])
+
+  // Load shared route from URL if present
+  useEffect(() => {
+    try {
+      const sharedRoute = getSharedRouteFromUrl()
+      if (sharedRoute && sharedRoute.stops && sharedRoute.stops.length > 0) {
+        const loadedItems: ItineraryItem[] = sharedRoute.stops.map((stop, index) => ({
+          id: stop.id,
+          name: stop.name,
+          lat: stop.lat,
+          lon: stop.lon,
+          type: stop.type as any || 'locality',
+          addedAt: Date.now() + index // Slight delay to preserve order
+        }))
+        setItinerary(loadedItems)
+        
+        // Save to Firestore if user is logged in
+        if (user) {
+          saveItinerary(user.uid, loadedItems).catch(console.error)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading shared route:', error)
+    }
+  }, [user])
 
   // Listen for authentication state changes and set up Firestore subscriptions
   useEffect(() => {
@@ -552,7 +580,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', gap: 16 }}>
           <div>
             <h1 style={{ fontSize: 18, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
               Australia Trip Scheduler
@@ -564,9 +592,27 @@ export default function App() {
                 color: '#0f172a',
                 border: '1px solid #cbd5e1'
               }} title="Version">
-                v5.0
+                v6.0
               </span>
             </h1>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 6 }}>
+              <a 
+                className="button small" 
+                href="/interactive-Aus-map/user-manual.html" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                title="Open the latest User Manual"
+              >
+                📘 User Manual
+              </a>
+              <button 
+                className="button small"
+                title="See what's new in v6.0"
+                onClick={() => setShowWhatsNew(true)}
+              >
+                ✨ What's New
+              </button>
+            </div>
             {summary}
             <div style={{ fontSize: 12, color: '#475569' }}>
               Start: {startLocation ? (startLocation.name ?? `${startLocation.lat.toFixed(3)}, ${startLocation.lon.toFixed(3)}`) : 'None'}
@@ -580,60 +626,32 @@ export default function App() {
               </div>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <a 
-              className="button small" 
-              href="/interactive-Aus-map/user-manual.html" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              title="Open the latest User Manual"
-            >
-              📘 User Manual
-            </a>
-            <button 
-              className="button small"
-              title="See what's new in v5.0"
-              onClick={() => setShowWhatsNew(true)}
-            >
-              ✨ What's New
-            </button>
-          </div>
-        </div>
 
-          <div style={{ position: 'relative', display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input
-              className="startInput"
-              placeholder="Type start place (e.g. Adelaide)"
-              value={startQuery}
-              onChange={(e) => setStartQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') geocodeStart() }}
-              disabled={isGeocoding}
-              aria-label="Start place input"
-            />
-            <button className="button" onClick={geocodeStart} disabled={isGeocoding || !startQuery.trim()}>
-              {isGeocoding ? 'Searching…' : 'Set Start'}
-            </button>
-            {startLocation && (
-              <button className="button small" onClick={clearStart} title="Clear start location">
-                Clear start
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center', flexGrow: 1 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                className="startInput"
+                placeholder="Type start place (e.g. Adelaide)"
+                value={startQuery}
+                onChange={(e) => setStartQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') geocodeStart() }}
+                disabled={isGeocoding || !!startLocation}
+                aria-label="Start place input"
+              />
+              <button className="button" onClick={geocodeStart} disabled={isGeocoding || !startQuery.trim() || !!startLocation}>
+                {isGeocoding ? 'Searching…' : 'Set Start'}
               </button>
+            </div>
+            {startLocation && (
+              <div style={{ fontSize: 14, fontWeight: 500, color: '#1e40af', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>Starting from</span>
+                <span>⭐</span>
+                <span>{startLocation.name || 'Start location'}</span>
+                <button className="button small" onClick={clearStart} title="Clear start location">
+                  Clear
+                </button>
+              </div>
             )}
-            <button 
-              className="button small" 
-              onClick={() => setShowSmallTownsOnly(!showSmallTownsOnly)} 
-              title="Show only towns with population under 10,000"
-              style={{ backgroundColor: showSmallTownsOnly ? '#f59e0b' : undefined }}
-            >
-              {showSmallTownsOnly ? 'All Towns' : 'Small Towns'}
-            </button>
-            <button 
-              className="button small" 
-              onClick={() => setShowCampsites(!showCampsites)} 
-              title="Show/hide campsite markers"
-              style={{ backgroundColor: showCampsites ? '#10b981' : '#ef4444' }}
-            >
-              {showCampsites ? 'Hide Camps' : 'Show Camps'}
-            </button>
             <div style={{ position: 'relative' }}>
               {geocodeResults && (
                 <div className="geocodePickOverlay">
@@ -651,23 +669,41 @@ export default function App() {
             </div>
           </div>
 
-          <button className="button" onClick={updateRoute} disabled={isRouting || itinerary.length === 0}>
-            {isRouting ? 'Routing…' : 'Update Route'}
-          </button>
-          {isRouting && <span className="spinner" aria-hidden="true" />}
-          <button className="button" onClick={exportGPX} disabled={!route} title="Download route as GPX">
-            Export GPX
-          </button>
-          <button className="button" onClick={openInGoogleMaps} disabled={!route} title="Open route in Google Maps">
-            Open in Google Maps
-          </button>
-          <button
-            className="button"
-            onClick={() => setSelectingStart((s) => !s)}
-            style={{ background: selectingStart ? '#f97316' : undefined }}
-          >
-            {selectingStart ? 'Click map to set start (esc to cancel)' : 'Select start'}
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <button 
+              className="button small" 
+              onClick={() => setShowSmallTownsOnly(!showSmallTownsOnly)} 
+              title="Show only towns with population under 10,000"
+              style={{ background: showSmallTownsOnly ? '#ef4444' : '#10b981' }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span>Show Only Small Towns</span>
+                <span style={{ fontSize: 10, marginTop: 2 }}>{showSmallTownsOnly ? 'Enabled' : 'Disabled'}</span>
+              </div>
+            </button>
+            <button 
+              className="button small" 
+              onClick={() => setShowCampsites(!showCampsites)} 
+              title="Show/hide campsite markers"
+              style={{ background: showCampsites ? '#10b981' : '#ef4444' }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span>Show Campsites</span>
+                <span style={{ fontSize: 10, marginTop: 2 }}>{showCampsites ? 'Enabled' : 'Disabled'}</span>
+              </div>
+            </button>
+            <button className="button" onClick={updateRoute} disabled={isRouting || itinerary.length === 0}>
+              {isRouting ? 'Routing…' : 'Update Route'}
+            </button>
+            {isRouting && <span className="spinner" aria-hidden="true" />}
+            <button className="button" onClick={exportGPX} disabled={!route} title="Download route as GPX">
+              Export GPX
+            </button>
+            <button className="button" onClick={openInGoogleMaps} disabled={!route} title="Open route in Google Maps">
+              Open in Google Maps
+            </button>
+          </div>
+        </div>
       </header>
       <main className="main">
         <div className="mapPane">
@@ -704,7 +740,12 @@ export default function App() {
               setItinerary((prev) => {
                 // Don't add if already in itinerary
                 if (prev.some((x) => x.id === startPlace.id)) return prev
-                return [startPlace, ...prev]
+                const updated = [startPlace, ...prev]
+                // Save to Firestore
+                if (user) {
+                  saveItinerary(user.uid, updated).catch(console.error)
+                }
+                return updated
               })
             }}
           />
@@ -741,7 +782,7 @@ export default function App() {
               className="button" 
               onClick={() => setShowFuelStations(!showFuelStations)} 
               title="Show fuel stations near itinerary stops"
-              style={{ backgroundColor: showFuelStations ? '#10b981' : undefined }}
+              style={{ background: showFuelStations ? '#ef4444' : '#10b981' }}
             >
               {showFuelStations ? 'Hide Fuel' : 'Show Fuel'}
             </button>
@@ -749,7 +790,7 @@ export default function App() {
               className="button" 
               onClick={() => setShowDumpPoints(!showDumpPoints)} 
               title="Show RV dump points near itinerary stops"
-              style={{ backgroundColor: showDumpPoints ? '#8b5cf6' : undefined }}
+              style={{ background: showDumpPoints ? '#ef4444' : '#10b981' }}
             >
               {showDumpPoints ? 'Hide Dumps' : 'Show Dumps'}
             </button>
@@ -757,12 +798,13 @@ export default function App() {
               className="button" 
               onClick={() => setShowWaterPoints(!showWaterPoints)} 
               title="Show drinking water filling points near itinerary stops"
-              style={{ backgroundColor: showWaterPoints ? '#8b5cf6' : undefined }}
+              style={{ background: showWaterPoints ? '#ef4444' : '#10b981' }}
             >
               {showWaterPoints ? 'Hide Water' : 'Show Water'}
             </button>
             <button className="button" onClick={exportItinerary} disabled={itinerary.length === 0} title="Download itinerary as JSON">Save itinerary</button>
             <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>
+            <button className="button" onClick={() => setShowShareModal(true)} disabled={itinerary.length === 0} title="Share your route with others">📤 Share Route</button>
             <input ref={fileInputRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={onFileChange} />
             <button className="button" onClick={clearItinerary} disabled={itinerary.length === 0} title="Remove all stops from itinerary">Clear itinerary</button>
             <button 
@@ -785,7 +827,8 @@ export default function App() {
           <Itinerary 
             items={itinerary} 
             onRemove={onRemove} 
-            onSetStart={onSetStart} 
+            onSetStart={onSetStart}
+            onClearStart={clearStart}
             startLocation={startLocation}
             onUploadAttachment={handleUploadAttachment}
             onDeleteAttachment={handleDeleteAttachment}
@@ -830,16 +873,16 @@ export default function App() {
             style={{ background: '#fff', borderRadius: 8, padding: 16, maxWidth: 520, width: '90%', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0 }}>What's New in v5.0</h3>
+              <h3 style={{ margin: 0 }}>What's New in v6.0</h3>
               <button className="button small" onClick={() => setShowWhatsNew(false)}>Close</button>
             </div>
             <ul style={{ marginTop: 12 }}>
-              <li>📖 Wikipedia links on all place markers (towns, cities, attractions) for quick information access.</li>
-              <li>🌤️ Weather emoji icons for better visual clarity in popups.</li>
+              <li>📤 Share routes with others via shareable links - no login required to load.</li>
+              <li>🔗 Routes are encoded in URLs for easy sharing via email, messaging, social media.</li>
+              <li>✏️ Shared routes can be edited before saving - full flexibility for recipients.</li>
+              <li>📖 Wikipedia links on place markers for quick information access.</li>
               <li>📎 File attachments for Favorites and Itinerary stops (photos, PDFs, docs).</li>
-              <li>⏱️ Upload progress indicator for smooth file uploads.</li>
               <li>🎨 Professional 3D beveled button styling throughout the app.</li>
-              <li>📘 User Manual button for quick access to documentation.</li>
             </ul>
             <div style={{ marginTop: 12 }}>
               <a href="/interactive-Aus-map/user-manual.html" target="_blank" rel="noopener noreferrer" className="button">Read the Manual</a>
@@ -847,6 +890,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <ShareItinerary itinerary={itinerary} isOpen={showShareModal} onClose={() => setShowShareModal(false)} />
     </div>
   )
 }

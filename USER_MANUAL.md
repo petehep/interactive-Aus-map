@@ -9,14 +9,16 @@ Welcome to your Australia Trip Planning Companion! This app helps you plan, orga
 2. [Signing In](#signing-in)
 3. [Understanding the Map](#understanding-the-map)
 4. [Planning Your Route](#planning-your-route)
-5. [Finding Campsites](#finding-campsites)
-6. [Managing Favorites](#managing-favorites)
-7. [Tracking Visited Places](#tracking-visited-places)
-8. [Finding Essential Services](#finding-essential-services)
-9. [Weather Information](#weather-information)
-10. [Attachments](#attachments)
-11. [Tips & Tricks](#tips--tricks)
-12. [Troubleshooting](#troubleshooting)
+5. [Setting Your Start Location](#setting-your-start-location)
+6. [Finding Campsites](#finding-campsites)
+7. [Managing Favorites](#managing-favorites)
+8. [Tracking Visited Places](#tracking-visited-places)
+9. [Finding Essential Services](#finding-essential-services)
+10. [Weather Information](#weather-information)
+11. [Attachments](#attachments)
+12. [Saving & Sharing Routes](#saving--sharing-routes)
+13. [Tips & Tricks](#tips--tricks)
+14. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -116,37 +118,52 @@ Places you've marked as visited show:
 
 ### Step 1: Set Your Starting Point
 
-1. Look at the **left sidebar**
-2. Find **"Start Location"**
+1. Look at the **center top of the header**
+2. Find **"Type start place"** search field
 3. **Type a city or town name** (e.g., "Sydney")
-4. Press **Enter** or click **"Geocode Start"**
+4. Press **Enter** or click **"Set Start"** button
 5. The map will center on that location
+6. A **blue marker with a star** (⭐) appears on the map showing your start location
+7. The **start name displays below the input** field and in the sidebar
+
+**Alternative Method:**
+- Click **"Set as start"** on any place marker popup
+
+**Clearing the Start Location:**
+- Click the **"Clear"** button next to the start location display
 
 ### Step 2: Build Your Itinerary
 
 **Adding Places:**
 1. **Click on any marker** on the map
 2. A popup appears with place information
-3. Click **"Add to Itinerary"** button
+3. Click **"Add to Itinerary"** button (note: this button only appears if no start location is set)
 4. The place is added to your trip!
 
 **Your Itinerary Appears:**
-- In the **"Itinerary"** section (left sidebar)
+- In the **"Itinerary"** section (right sidebar)
 - Shows all your stops in order
 - Lists distances and driving times between stops
 
+**Making a Stop Your Start Location:**
+- Click **"Make Start"** on any itinerary item (only visible when no start is set)
+
+**Clearing a Start Location from Itinerary:**
+- If a stop is already your start location, click **"Clear From Start"** instead of "Make Start"
+
 ### Step 3: Calculate Your Route
 
-Once you've added 2 or more places:
+Once you've added 2 or more places with a start location set:
 1. A **blue line** appears on the map automatically
 2. This shows your **driving route**
 3. The route **updates automatically** when you add/remove places
+4. Click **"Update Route"** button to manually recalculate
 
 ### Managing Your Itinerary
 
 **Removing a Stop:**
-1. Find the place in your **Itinerary list** (left sidebar)
-2. Click the **"Remove"** button next to it
+1. Find the place in your **Itinerary list** (right sidebar)
+2. Click the **"Remove From Itinerary"** button next to it
 3. The route recalculates automatically
 
 **Clearing Everything:**
@@ -160,17 +177,57 @@ Once you've added 2 or more places:
 
 ---
 
+## Setting Your Start Location
+
+### Understanding the Start Location
+
+The **start location** is where your journey begins. It appears as a **blue marker with a star emoji (⭐)** on the map and must be set before you can build a route.
+
+### How to Set a Start Location
+
+**Method 1: Search**
+1. Find the **"Type start place"** field at the top center
+2. Type a place name (city, town, or landmark)
+3. Press **Enter** or click **"Set Start"**
+
+**Method 2: From Map**
+1. Click on any place marker
+2. In the popup, click **"Set as start"** button
+3. The place becomes your start location
+
+**Method 3: From Itinerary**
+1. Find a place in your itinerary list
+2. Click **"Make Start"** button
+3. That place is now your starting point
+
+### What Happens When You Set a Start Location
+
+- A **blue marker** appears on the map
+- Start location **displays in the center top** of the screen
+- **"Set as start" buttons disappear** from all markers and itinerary items
+- **"Make Start" buttons appear** in the itinerary instead of "Remove"
+- The **start item shows "Clear From Start"** button instead of "Make Start"
+
+### Clearing Your Start Location
+
+1. Click the **"Clear"** button next to the start name display
+2. Or click **"Clear From Start"** in the itinerary
+3. All markers and itinerary items now show **"Set as start"** again
+
+---
+
 ## Finding Campsites
 
 ### Viewing Campsites
 
 **Toggle Campsites:**
-1. Look in the **left sidebar**
-2. Find the **"Campsites"** toggle
-3. **ON (green)** = Campsites visible
-4. **OFF (gray)** = Campsites hidden
+1. Look in the **right sidebar** under the itinerary (top right area)
+2. Find the **"Show Campsites"** button
+3. **GREEN (Disabled)** = Campsites are hidden
+4. **RED (Enabled)** = Campsites are visible on the map
+5. Click to toggle between showing and hiding campsites
 
-**Default:** Campsites are shown when you zoom in past a certain level.
+**Default:** Campsites are shown when you have the toggle enabled and zoom in.
 
 ### Types of Campsites
 
@@ -192,6 +249,7 @@ Click on any campsite marker to see:
 - **Name** of the campsite
 - **Add to Itinerary** button
 - **❤️ Heart icon** - Add to favorites
+- **"Set as start"** button - Make this your starting point
 - **✓ Visited status** - If you've been there
 
 **Tip:** Many free campsites have minimal facilities. Always check conditions before visiting!
@@ -226,6 +284,71 @@ You can also manage attachments directly from your **Itinerary** list. Each stop
 ### Storage & Privacy
 - Files are private to your account
 - Attachments are stored in the cloud and available on any device after login
+
+---
+
+## Saving & Sharing Routes
+
+### Saving Your Route
+
+You can save your itinerary (list of stops) as a file to your computer and reload it later.
+
+**To Save Your Route:**
+1. Build your itinerary with all your stops
+2. Click **"Save itinerary"** button (right sidebar)
+3. A file will download to your computer named `itinerary-YYYYMMDD.json`
+4. Save this file safely on your device
+
+**To Load a Saved Route:**
+1. Click **"Load itinerary"** button (right sidebar)
+2. Select your saved `itinerary-YYYYMMDD.json` file
+3. Your stops will be loaded into the app
+4. **IMPORTANT:** You must set a start location before viewing the route
+   - Type a city name in the start location search field OR
+   - Click "Set as start" on any marker or itinerary item
+5. Click **"Update Route"** to see the blue route line on the map
+
+### Sharing Your Route
+
+Share your planned route with friends, family, or other travelers!
+
+**To Share a Route:**
+1. Build your itinerary with all your stops
+2. Click **"📤 Share Route"** button (right sidebar)
+3. A dialog opens with:
+   - **Title field** (e.g., "Australian East Coast Road Trip")
+   - **Description field** (optional, e.g., "2 weeks, Sydney to Melbourne")
+4. Click **"Share"** button
+5. A unique **share link** appears - copy it!
+6. Send the link to friends via email, messaging, or social media
+
+**Receiving a Shared Route:**
+1. Click on the share link sent by your friend
+2. The app opens with their itinerary loaded
+3. **IMPORTANT:** Follow these steps to view the route:
+   - Click on any stop in the itinerary
+   - Click **"Set as start"** on the place you want to start from
+   - Click **"Update Route"** button to calculate the route
+   - The blue route line will appear on the map
+4. You can now:
+   - View the full planned route
+   - Add more stops if desired
+   - Click "Save itinerary" to keep a copy
+   - Make changes to the route (it won't affect the original)
+
+**Important Notes:**
+- Shared routes do NOT include any attachments for privacy
+- Anyone with the link can view the route
+- You can save a received route to keep your own copy
+- Modifications you make do not affect the original shared route
+
+### Viewing Multiple Routes
+
+You can work with multiple routes:
+1. **Save routes** frequently as you make changes
+2. **Load different routes** using the "Load itinerary" button
+3. **Share routes** with different groups of people
+4. Each route is independent and doesn't affect others
 
 
 Favorites let you save places you want to remember or visit later.
@@ -346,62 +469,90 @@ Even if you:
 
 ## Finding Essential Services
 
+### Understanding the Filter Buttons
+
+The filter buttons in the right sidebar show their status with colors:
+- **GREEN (Disabled)** = Service markers are hidden
+- **RED (Enabled)** = Service markers are visible on the map
+
+Each service button shows:
+- The service name (e.g., "Show Fuel Stations")
+- The current status: **Enabled** or **Disabled**
+
 ### Fuel Stations ⛽
 
 **Show Fuel Stations:**
-1. Find **"Fuel Stations"** toggle in sidebar
-2. Turn it **ON (green)**
+1. Find **"Fuel Stations"** button in the right sidebar
+2. Click to turn **ON (turns RED)**
 3. **Orange markers** appear on the map
 4. Fuel stations are shown within 10km of your itinerary stops
 
 **Hide Fuel Stations:**
-- Toggle back to **OFF (gray)**
+- Click again to toggle back to **OFF (turns GREEN)**
 
 **Fuel Station Info:**
 - Click any orange marker
 - Shows station name (if available)
 - Add to itinerary or favorites
+- Click "Set as start" to make it a starting point
 
 ### Dump Points 🚽
 
 For emptying your RV waste tanks.
 
 **Show Dump Points:**
-1. Find **"Dump Points"** toggle
-2. Turn it **ON (green)**
-3. **Blue markers** appear
+1. Find **"Dump Points"** button in the right sidebar
+2. Click to turn **ON (turns RED)**
+3. **Blue markers** appear on the map
 4. Within 10km of itinerary stops
 
 **Features:**
 - Often at rest areas or campgrounds
 - Some are free, some paid
 - Check popup for details
+- Can add to itinerary or favorites
 
 ### Water Points 💧
 
 For filling fresh water tanks.
 
 **Show Water Points:**
-1. Find **"Water Points"** toggle
-2. Turn it **ON (green)**
-3. **Cyan/light blue markers** appear
+1. Find **"Water Points"** button in the right sidebar
+2. Click to turn **ON (turns RED)**
+3. **Cyan/light blue markers** appear on the map
 
 **Types:**
 - Public drinking water taps
 - Designated RV water fill points
 - Community water stations
+- Rest area facilities
+
+### Small Towns Filter
+
+**Show Only Small Towns:**
+1. Find **"Show Only Small Towns"** button in the right sidebar
+2. Click to turn **ON (turns RED)** - shows **Enabled**
+3. Maps display only towns with population under 10,000
+4. Click again to show **all towns** - turns **GREEN** with **Disabled**
+
+**Why Use This?**
+- Find quieter, smaller communities along your route
+- Great for finding charming stops off the main highways
+- Avoid major cities if you prefer smaller towns
 
 ### Important Notes About Services
 
 ⚠️ **Services only appear when:**
 - You have an **itinerary with stops**
-- The toggle is **turned ON**
+- The filter toggle is **turned ON (RED)**
 - You're **zoomed in** close enough
 
 💡 **Best Practice:**
 1. Plan your route first
-2. Then enable service toggles
-3. Find services along your route
+2. Set your start location
+3. Then enable service toggles
+4. Find services along your route
+5. Click "Update Route" to recalculate with services included
 
 ---
 

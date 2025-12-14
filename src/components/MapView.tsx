@@ -202,6 +202,18 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     className: 'cyan-marker'
   }), [])
 
+  // Create blue icon for start location
+  const startIcon = useMemo(() => new L.Icon({
+    iconRetinaUrl: marker2x,
+    iconUrl: marker1x,
+    shadowUrl: markerShadow,
+    iconSize: [30, 49],
+    iconAnchor: [15, 49],
+    popupAnchor: [1, -40],
+    shadowSize: [41, 41],
+    className: 'start-marker'
+  }), [])
+
   const fetchPlaces = async (bbox: BBox, smallTownsFilter: boolean = false) => {
     // Build bbox string for query
     const bboxStr = `(${bbox.south},${bbox.west},${bbox.north},${bbox.east})`
@@ -678,7 +690,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                         </button>
                       )
                     })()}
-                    {onStartSelected && (
+                    {onStartSelected && !startLocation && (
                       <button className="button" onClick={() => onStartSelected(p.lat, p.lon, p.name)}>Set as start</button>
                     )}
                   </div>
@@ -744,7 +756,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                       </button>
                     )
                   })()}
-                  {onStartSelected && (
+                  {onStartSelected && !startLocation && (
                     <button className="button" onClick={() => onStartSelected(c.lat, c.lon, c.name)}>Set as start</button>
                   )}
                 </div>
@@ -810,7 +822,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                       </button>
                     )
                   })()}
-                  {onStartSelected && (
+                  {onStartSelected && !startLocation && (
                     <button className="button" onClick={() => onStartSelected(c.lat, c.lon, c.name)}>Set as start</button>
                   )}
                 </div>
@@ -847,7 +859,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                   >
                     {selectedIds.has(f.id) ? 'Added' : 'Add to itinerary'}
                   </button>
-                  {onStartSelected && (
+                  {onStartSelected && !startLocation && (
                     <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(f.lat, f.lon, f.name)}>Set as start</button>
                   )}
                 </div>
@@ -883,7 +895,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                   >
                     {selectedIds.has(d.id) ? 'Added' : 'Add to itinerary'}
                   </button>
-                  {onStartSelected && (
+                  {onStartSelected && !startLocation && (
                     <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(d.lat, d.lon, d.name)}>Set as start</button>
                   )}
                 </div>
@@ -919,7 +931,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                   >
                     {selectedIds.has(w.id) ? 'Added' : 'Add to itinerary'}
                   </button>
-                  {onStartSelected && (
+                  {onStartSelected && !startLocation && (
                     <button className="button" style={{ marginLeft: 8 }} onClick={() => onStartSelected(w.lat, w.lon, w.name)}>Set as start</button>
                   )}
                 </div>
@@ -929,10 +941,10 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
         </MarkerClusterGroup>
       )}
       {startLocation && (
-        <Marker position={[startLocation.lat, startLocation.lon]}>
+        <Marker position={[startLocation.lat, startLocation.lon]} icon={startIcon}>
           <Popup>
             <div style={{ minWidth: 140 }}>
-              <div style={{ fontWeight: 600 }}>{startLocation.name || 'Start'}</div>
+              <div style={{ fontWeight: 600 }}>⭐ {startLocation.name || 'Start'}</div>
               <div style={{ color: '#475569' }}>{startLocation.lat.toFixed(4)}, {startLocation.lon.toFixed(4)}</div>
             </div>
           </Popup>

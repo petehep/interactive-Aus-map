@@ -238,6 +238,11 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   filter: hue-rotate(90deg) saturate(1.8) brightness(1.1);
 }
 
+/* Start location marker styling - bright blue */
+.start-marker {
+  filter: hue-rotate(240deg) saturate(2.5) brightness(1.2) drop-shadow(0 0 2px rgba(14, 165, 233, 0.8));
+}
+
 /* Green marker styling for paid campsites */
 .green-marker {
   filter: hue-rotate(220deg) saturate(2.5) brightness(0.95);
