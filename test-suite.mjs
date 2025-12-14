@@ -500,8 +500,195 @@ function testCodeQuality() {
   });
 }
 
+function testV6Features() {
+  section('v6.0 - Route Sharing & Start Location');
+  
+  // Check route share service
+  const routeShareService = readFile('src/services/routeShareService.ts');
+  if (routeShareService) {
+    routeShareService.includes('encodeRoute')
+      ? testPass('Route share service has encodeRoute function')
+      : testFail('encodeRoute function', 'Function not found');
+    
+    routeShareService.includes('decodeRoute')
+      ? testPass('Route share service has decodeRoute function')
+      : testFail('decodeRoute function', 'Function not found');
+    
+    routeShareService.includes('generateShareUrl')
+      ? testPass('Route share service has generateShareUrl function')
+      : testFail('generateShareUrl function', 'Function not found');
+    
+    routeShareService.includes('getSharedRouteFromUrl')
+      ? testPass('Route share service has getSharedRouteFromUrl function')
+      : testFail('getSharedRouteFromUrl function', 'Function not found');
+    
+    routeShareService.includes('ShareableRoute')
+      ? testPass('ShareableRoute interface defined')
+      : testFail('ShareableRoute interface', 'Interface not found');
+  } else {
+    testFail('routeShareService.ts exists', 'File not found');
+  }
+  
+  // Check ShareItinerary component
+  const shareItinerary = readFile('src/components/ShareItinerary.tsx');
+  if (shareItinerary) {
+    shareItinerary.includes('isOpen')
+      ? testPass('ShareItinerary component has isOpen prop')
+      : testFail('ShareItinerary isOpen prop', 'Prop not found');
+    
+    shareItinerary.includes('handleShare')
+      ? testPass('ShareItinerary component has handleShare function')
+      : testFail('handleShare function', 'Function not found');
+    
+    shareItinerary.includes('handleCopyToClipboard')
+      ? testPass('ShareItinerary component has copy functionality')
+      : testFail('Copy to clipboard', 'Functionality not found');
+  } else {
+    testFail('ShareItinerary.tsx exists', 'File not found');
+  }
+  
+  // Check MapView for start location UI
+  const mapView = readFile('src/components/MapView.tsx');
+  if (mapView) {
+    mapView.includes('startIcon')
+      ? testPass('MapView has startIcon definition')
+      : testFail('startIcon definition', 'Not found');
+    
+    mapView.includes('!startLocation')
+      ? testPass('MapView conditionally shows "Set as start" button')
+      : testFail('Conditional "Set as start" button', 'Logic not found');
+  } else {
+    testFail('MapView.tsx exists', 'File not found');
+  }
+  
+  // Check Itinerary component for start location buttons
+  const itinerary = readFile('src/components/Itinerary.tsx');
+  if (itinerary) {
+    itinerary.includes('onClearStart')
+      ? testPass('Itinerary has onClearStart prop')
+      : testFail('onClearStart prop', 'Prop not found');
+    
+    itinerary.includes('Clear From Start')
+      ? testPass('Itinerary has "Clear From Start" button text')
+      : testFail('"Clear From Start" button', 'Button text not found');
+    
+    itinerary.includes('Remove From Itinerary')
+      ? testPass('Itinerary has "Remove From Itinerary" button text')
+      : testFail('"Remove From Itinerary" button', 'Button text not found');
+  } else {
+    testFail('Itinerary.tsx exists', 'File not found');
+  }
+  
+  // Check App.tsx for v6.0 integration
+  const appTsx = readFile('src/App.tsx');
+  if (appTsx) {
+    appTsx.includes('getSharedRouteFromUrl')
+      ? testPass('App.tsx imports route share utilities')
+      : testFail('Route share imports', 'Not found');
+    
+    appTsx.includes('showShareModal')
+      ? testPass('App.tsx has showShareModal state')
+      : testFail('showShareModal state', 'Not found');
+    
+    appTsx.includes('ShareItinerary')
+      ? testPass('App.tsx renders ShareItinerary component')
+      : testFail('ShareItinerary component render', 'Not found');
+    
+    appTsx.includes('Starting from')
+      ? testPass('App.tsx displays "Starting from" text')
+      : testFail('"Starting from" display', 'Not found');
+    
+    appTsx.includes('v6.0')
+      ? testPass('Version bumped to v6.0')
+      : testFail('Version v6.0', 'Version not updated');
+  } else {
+    testFail('App.tsx exists', 'File not found');
+  }
+  
+  // Check index.css for start marker styling
+  const css = readFile('src/index.css');
+  if (css) {
+    css.includes('.start-marker')
+      ? testPass('CSS has .start-marker class')
+      : testFail('.start-marker CSS class', 'Not found');
+    
+    css.includes('hue-rotate')
+      ? testPass('Start marker has blue color filter')
+      : testFail('Start marker color filter', 'Not found');
+  } else {
+    testFail('index.css exists', 'File not found');
+  }
+}
+
+function testUIEnhancements() {
+  section('UI Enhancements - v6.0');
+  
+  const appTsx = readFile('src/App.tsx');
+  if (appTsx) {
+    appTsx.includes('Show Only Small Towns')
+      ? testPass('Small Towns button has new text')
+      : testFail('Small Towns button text', 'Not found');
+    
+    appTsx.includes('Show Campsites')
+      ? testPass('Campsites button has new text')
+      : testFail('Campsites button text', 'Not found');
+    
+    appTsx.includes('Enabled')
+      ? testPass('Buttons show Enabled/Disabled status')
+      : testFail('Enabled/Disabled status', 'Not found');
+    
+    appTsx.includes('Share Route')
+      ? testPass('Share Route button exists')
+      : testFail('Share Route button', 'Not found');
+    
+    // Check color coding
+    appTsx.match(/#ef4444/g) && appTsx.match(/#10b981/g)
+      ? testPass('Buttons use red/green color coding')
+      : testFail('Color coding (red/green)', 'Not found');
+  } else {
+    testFail('App.tsx exists', 'File not found');
+  }
+}
+
+function testUserManual() {
+  section('User Manual - v6.0 Documentation');
+  
+  const manual = readFile('USER_MANUAL.md');
+  if (manual) {
+    manual.includes('Setting Your Start Location')
+      ? testPass('Manual has "Setting Your Start Location" section')
+      : testFail('Start Location section', 'Section not found');
+    
+    manual.includes('Saving & Sharing Routes')
+      ? testPass('Manual has "Saving & Sharing Routes" section')
+      : testFail('Saving & Sharing section', 'Section not found');
+    
+    manual.includes('Update Route')
+      ? testPass('Manual mentions Update Route button')
+      : testFail('Update Route documentation', 'Not mentioned');
+    
+    manual.includes('Clear From Start')
+      ? testPass('Manual documents "Clear From Start" button')
+      : testFail('"Clear From Start" documentation', 'Not found');
+    
+    manual.includes('Remove From Itinerary')
+      ? testPass('Manual documents "Remove From Itinerary" button')
+      : testFail('"Remove From Itinerary" documentation', 'Not found');
+    
+    manual.includes('share link') || manual.includes('Share Route')
+      ? testPass('Manual documents route sharing')
+      : testFail('Route sharing documentation', 'Not found');
+    
+    manual.includes('Enabled') && manual.includes('Disabled')
+      ? testPass('Manual documents Enabled/Disabled button states')
+      : testFail('Button states documentation', 'Not found');
+  } else {
+    testFail('USER_MANUAL.md exists', 'File not found');
+  }
+}
+
 // Run all tests
-console.log('\n' + colors.bold + '═══ Australia Trip Scheduler - Test Suite v3.0 ═══' + colors.reset);
+console.log('\n' + colors.bold + '═══ Australia Trip Scheduler - Test Suite v6.0 ═══' + colors.reset);
 console.log(`Started: ${new Date().toLocaleString()}`);
 console.log(`Environment: ${process.platform} | Node ${process.version.substring(1)}\n`);
 
@@ -512,6 +699,9 @@ testComponentImplementation();
 testConfiguration();
 testSecurity();
 testDocumentation();
+testV6Features();
+testUIEnhancements();
+testUserManual();
 testGitSetup();
 testDependencies();
 testCodeQuality();
