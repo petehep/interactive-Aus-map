@@ -1,7 +1,7 @@
-# Australia Trip Scheduler - Technical Documentation v4.0
+# Australia Trip Scheduler - Technical Documentation v4.1
 
-**Last Updated:** December 12, 2025  
-**Version:** 4.0 - File Attachments & Professional UI Styling  
+**Last Updated:** December 14, 2025  
+**Version:** 4.1 - File Attachments, Professional UI Styling, Sidebar UI Polish  
 **Repository:** https://github.com/petehep/interactive-Aus-map  
 **Live URL:** https://petehep.github.io/interactive-Aus-map/
 
@@ -96,6 +96,11 @@
    - Improved spacing between buttons (6px horizontal, 4px vertical)
    - Consistent padding and sizing
    - Better visual hierarchy
+
+### Sidebar UI Polish (Dec 14, 2025)
+- Right sidebar now uses a pinned header (itinerary title + route duration + 3×3 control grid for fuel/dumps/water, save/load/clear, share/logout).
+- Sidebar content (Itinerary list + Favorites) scrolls independently; the map pane stays fixed to avoid whole-page scrolling.
+- Control grid columns align for consistent layout across all nine buttons.
 
 ### "What's New" Modal
 **New:** Welcome modal showcasing v4.0 features for new sessions.
