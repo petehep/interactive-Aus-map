@@ -751,99 +751,105 @@ export default function App() {
           />
         </div>
         <aside className="sidebar">
-          <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>Itinerary</span>
-            {route && route.legs && route.legs.length > 0 && (
-              <span style={{ fontSize: 14, fontWeight: 'normal', color: '#475569' }}>
-                {(() => {
-                  const totalSeconds = route.legs.reduce((sum, leg) => sum + leg.duration, 0)
-                  const totalHours = totalSeconds / 3600
-                  
-                  if (totalHours >= 24) {
-                    const days = Math.floor(totalHours / 24)
-                    const hours = Math.floor(totalHours % 24)
+          <div className="sidebarHeader">
+            <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <span>Itinerary</span>
+              {route && route.legs && route.legs.length > 0 && (
+                <span style={{ fontSize: 14, fontWeight: 'normal', color: '#475569' }}>
+                  {(() => {
+                    const totalSeconds = route.legs.reduce((sum, leg) => sum + leg.duration, 0)
+                    const totalHours = totalSeconds / 3600
+                    
+                    if (totalHours >= 24) {
+                      const days = Math.floor(totalHours / 24)
+                      const hours = Math.floor(totalHours % 24)
+                      const minutes = Math.round((totalSeconds % 3600) / 60)
+                      return days > 0 && hours > 0 
+                        ? `${days}d ${hours}h ${minutes}m`
+                        : days > 0 
+                          ? `${days}d ${minutes}m`
+                          : `${hours}h ${minutes}m`
+                    }
+                    
+                    const hours = Math.floor(totalHours)
                     const minutes = Math.round((totalSeconds % 3600) / 60)
-                    return days > 0 && hours > 0 
-                      ? `${days}d ${hours}h ${minutes}m`
-                      : days > 0 
-                        ? `${days}d ${minutes}m`
-                        : `${hours}h ${minutes}m`
-                  }
-                  
-                  const hours = Math.floor(totalHours)
-                  const minutes = Math.round((totalSeconds % 3600) / 60)
-                  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
-                })()}
-              </span>
-            )}
-          </h2>
-          <div style={{ padding: 8, display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
-            <button 
-              className="button" 
-              onClick={() => setShowFuelStations(!showFuelStations)} 
-              title="Show fuel stations near itinerary stops"
-              style={{ background: showFuelStations ? '#ef4444' : '#10b981' }}
-            >
-              {showFuelStations ? 'Hide Fuel' : 'Show Fuel'}
-            </button>
-            <button 
-              className="button" 
-              onClick={() => setShowDumpPoints(!showDumpPoints)} 
-              title="Show RV dump points near itinerary stops"
-              style={{ background: showDumpPoints ? '#ef4444' : '#10b981' }}
-            >
-              {showDumpPoints ? 'Hide Dumps' : 'Show Dumps'}
-            </button>
-            <button 
-              className="button" 
-              onClick={() => setShowWaterPoints(!showWaterPoints)} 
-              title="Show drinking water filling points near itinerary stops"
-              style={{ background: showWaterPoints ? '#ef4444' : '#10b981' }}
-            >
-              {showWaterPoints ? 'Hide Water' : 'Show Water'}
-            </button>
-            <button className="button" onClick={exportItinerary} disabled={itinerary.length === 0} title="Download itinerary as JSON">Save itinerary</button>
-            <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>
-            <button className="button" onClick={() => setShowShareModal(true)} disabled={itinerary.length === 0} title="Share your route with others">📤 Share Route</button>
-            <input ref={fileInputRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={onFileChange} />
-            <button className="button" onClick={clearItinerary} disabled={itinerary.length === 0} title="Remove all stops from itinerary">Clear itinerary</button>
-            <button 
-              className="button" 
-              onClick={() => setShowVisitedModal(true)} 
-              title="View all places you've visited"
-              style={{ backgroundColor: visitedPlaces.length > 0 ? '#10b981' : undefined }}
-            >
-              📍 Show Visits ({visitedPlaces.length})
-            </button>
-            <button 
-              className="button" 
-              onClick={handleLogout}
-              title="Sign out"
-              style={{ backgroundColor: '#ef4444' }}
-            >
-              Logout
-            </button>
+                    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+                  })()}
+                </span>
+              )}
+            </h2>
+            <p style={{ margin: '0 0 8px 0', fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>Scroll down to view Favourites</p>
+            <div className="button-grid">
+              <button 
+                className="button" 
+                onClick={() => setShowFuelStations(!showFuelStations)} 
+                title="Show fuel stations near itinerary stops"
+                style={{ background: showFuelStations ? '#ef4444' : '#10b981' }}
+              >
+                {showFuelStations ? 'Hide Fuel' : 'Show Fuel'}
+              </button>
+              <button className="button" onClick={exportItinerary} disabled={itinerary.length === 0} title="Download itinerary as JSON">Save itinerary</button>
+              <button 
+                className="button" 
+                onClick={() => setShowVisitedModal(true)} 
+                title="View all places you've visited"
+                style={{ backgroundColor: visitedPlaces.length > 0 ? '#10b981' : undefined }}
+              >
+                📍 Show Visits ({visitedPlaces.length})
+              </button>
+              <button 
+                className="button" 
+                onClick={() => setShowDumpPoints(!showDumpPoints)} 
+                title="Show RV dump points near itinerary stops"
+                style={{ background: showDumpPoints ? '#ef4444' : '#10b981' }}
+              >
+                {showDumpPoints ? 'Hide Dumps' : 'Show Dumps'}
+              </button>
+              <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>
+              <button className="button" onClick={clearItinerary} disabled={itinerary.length === 0} title="Remove all stops from itinerary">Clear itinerary</button>
+              <button 
+                className="button" 
+                onClick={() => setShowWaterPoints(!showWaterPoints)} 
+                title="Show drinking water filling points near itinerary stops"
+                style={{ background: showWaterPoints ? '#ef4444' : '#10b981' }}
+              >
+                {showWaterPoints ? 'Hide Water' : 'Show Water'}
+              </button>
+              <button className="button" onClick={() => setShowShareModal(true)} disabled={itinerary.length === 0} title="Share your route with others">📤 Share Route</button>
+              <button 
+                className="button" 
+                onClick={handleLogout}
+                title="Sign out"
+                style={{ backgroundColor: '#ef4444' }}
+              >
+                Logout
+              </button>
+              <input ref={fileInputRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={onFileChange} />
+            </div>
           </div>
-          <Itinerary 
-            items={itinerary} 
-            onRemove={onRemove} 
-            onSetStart={onSetStart}
-            onClearStart={clearStart}
-            startLocation={startLocation}
-            onUploadAttachment={handleUploadAttachment}
-            onDeleteAttachment={handleDeleteAttachment}
-          />
-          <div style={{ marginTop: 24 }}>
-            <h2 style={{ margin: '0 0 12px 0', fontSize: 18, fontWeight: 600 }}>❤️ Favorites ({favorites.length})</h2>
-            <Favorites 
-              favorites={favorites} 
-              onAddToItinerary={onAddPlace} 
-              onRemove={removeFavorite}
-              onCenterMap={centerMap}
-              onToggleVisited={toggleVisited}
+          
+          <div className="sidebarContent">
+            <Itinerary 
+              items={itinerary} 
+              onRemove={onRemove} 
+              onSetStart={onSetStart}
+              onClearStart={clearStart}
+              startLocation={startLocation}
               onUploadAttachment={handleUploadAttachment}
               onDeleteAttachment={handleDeleteAttachment}
             />
+            <div style={{ marginTop: 24 }}>
+              <h2 style={{ margin: '0 0 12px 0', fontSize: 18, fontWeight: 600 }}>❤️ Favorites ({favorites.length})</h2>
+              <Favorites 
+                favorites={favorites} 
+                onAddToItinerary={onAddPlace} 
+                onRemove={removeFavorite}
+                onCenterMap={centerMap}
+                onToggleVisited={toggleVisited}
+                onUploadAttachment={handleUploadAttachment}
+                onDeleteAttachment={handleDeleteAttachment}
+              />
+            </div>
           </div>
         </aside>
       </main>
