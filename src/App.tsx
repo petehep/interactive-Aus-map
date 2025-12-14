@@ -564,7 +564,7 @@ export default function App() {
                 color: '#0f172a',
                 border: '1px solid #cbd5e1'
               }} title="Version">
-                v4.0
+                v5.0
               </span>
             </h1>
             {summary}
@@ -592,7 +592,7 @@ export default function App() {
             </a>
             <button 
               className="button small"
-              title="See what's new in v4.0"
+              title="See what's new in v5.0"
               onClick={() => setShowWhatsNew(true)}
             >
               ✨ What's New
@@ -830,16 +830,16 @@ export default function App() {
             style={{ background: '#fff', borderRadius: 8, padding: 16, maxWidth: 520, width: '90%', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0 }}>What's New in v4.0</h3>
+              <h3 style={{ margin: 0 }}>What's New in v5.0</h3>
               <button className="button small" onClick={() => setShowWhatsNew(false)}>Close</button>
             </div>
             <ul style={{ marginTop: 12 }}>
-              <li>📎 Attachments for Favorites: upload/view/download/delete photos, PDFs, and docs.</li>
-              <li>📎 Attachments for Itinerary stops with the same controls.</li>
-              <li>⏱️ Upload progress indicator for a smoother experience.</li>
-              <li>🔒 Secure Firebase Storage rules (10MB per file, allowed types only).</li>
-              <li>📘 New "User Manual" button that opens the latest manual.</li>
-              <li>⭐ Visible version badge in the header.</li>
+              <li>📖 Wikipedia links on all place markers (towns, cities, attractions) for quick information access.</li>
+              <li>🌤️ Weather emoji icons for better visual clarity in popups.</li>
+              <li>📎 File attachments for Favorites and Itinerary stops (photos, PDFs, docs).</li>
+              <li>⏱️ Upload progress indicator for smooth file uploads.</li>
+              <li>🎨 Professional 3D beveled button styling throughout the app.</li>
+              <li>📘 User Manual button for quick access to documentation.</li>
             </ul>
             <div style={{ marginTop: 12 }}>
               <a href="/interactive-Aus-map/user-manual.html" target="_blank" rel="noopener noreferrer" className="button">Read the Manual</a>
