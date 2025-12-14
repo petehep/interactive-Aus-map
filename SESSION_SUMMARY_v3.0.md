@@ -1,5 +1,10 @@
 # Australia Trip Scheduler - Session Summary (December 12, 2025)
 
+## ✨ Latest Additions (Dec 14, 2025)
+- Right sidebar now has a pinned header with the itinerary title, route duration, and a 3×3 control button grid (fuel/dumps/water, save/load/clear, share/logout).
+- Itinerary list and Favorites panel now scroll together inside the sidebar; the map stays fixed (no whole-page scrolling).
+- Button grid columns aligned for consistent layout across the nine controls.
+
 ## 🎯 Session Overview
 
 **Objective:** Implement cloud database for multi-device trip data synchronization  

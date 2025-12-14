@@ -73,6 +73,11 @@
    - Users can only access their own data
    - Encrypted in transit and at rest
 
+### Latest UI Polish (Dec 14, 2025)
+- Pinned itinerary header and control grid in the right sidebar; itinerary and favorites now scroll together independently of the map.
+- 3×3 control button grid aligned in the sidebar header for fuel/dumps/water, save/load/clear, share/logout, keeping controls visible while scrolling.
+- Sidebar uses fixed header + scrollable content region; main map remains fixed to avoid whole-page scroll.
+
 ---
 
 ## Technology Stack
