@@ -1,9 +1,17 @@
-# Australia Trip Scheduler - Session Summary (December 12, 2025)
+# Australia Trip Scheduler - Session Summary (December 14, 2025 - v6.0)
 
-## ✨ Latest Additions (Dec 14, 2025)
+## ✨ Latest Work (Dec 14, 2025)
+
+### GitHub Pages Deployment & Repository Cleanup
+- **Issue:** App broke when repo was made private (GitHub Pages requires public repo on free plan)
+- **Recovery:** Made repo public again; app restored to working state
+- **Temporary Fix:** Moved `dist/` folder contents to repo root for immediate deployment
+- **Proper Solution (IN PROGRESS):** Implementing automated GitHub Actions workflow to deploy to `gh-pages` branch (keeps source repo clean)
+
+### UI Polish (v6.0 - Dec 14)
 - Right sidebar now has a pinned header with the itinerary title, route duration, and a 3×3 control button grid (fuel/dumps/water, save/load/clear, share/logout).
 - Itinerary list and Favorites panel now scroll together inside the sidebar; the map stays fixed (no whole-page scrolling).
-- Button grid columns aligned for consistent layout across the nine controls.
+- Button grid columns perfectly aligned with CSS Grid (`grid-template-columns: repeat(3, 1fr)`).
 
 ## 🎯 Session Overview
 
@@ -201,16 +209,23 @@ Firestore
 
 ---
 
-## 🎯 Next Steps (For Future Sessions)
+## 🎯 Next Steps (Deployment Cleanup - IN PROGRESS)
 
-1. **Deploy Firestore Rules** (requires Firebase Console access)
-2. Test on production domain with multiple devices
-3. Monitor Firestore usage and optimize if needed
-4. Consider implementing:
-   - Offline mode with cached maps
-   - Trip sharing with other users
-   - Advanced filtering options
-   - Photo uploads
+### Current Task: Implement Proper GitHub Pages Deployment
+1. **Remove build artifacts from root** - Clean up `index.html`, `assets/`, `user-manual.html` from repo root
+2. **Restore `.gitignore`** - Add `dist/` back to ignore list (build artifacts should not be in source control)
+3. **Trigger Actions workflow** - Commit changes to main branch; `.github/workflows/deploy.yml` will automatically:
+   - Build the project
+   - Test the build
+   - Deploy built artifacts to `gh-pages` branch
+4. **Configure Pages to use `gh-pages`** - Set GitHub Pages source to `gh-pages` branch + `/ (root)` folder
+5. **Verify deployment** - Site will be live at https://petehep.github.io/interactive-Aus-map/ with clean source repo
+
+### Future Sessions
+1. Monitor site performance post-deployment
+2. Consider code-splitting to reduce bundle size (currently 894KB JS, ~236KB gzipped)
+3. Test on production domain with multiple devices
+4. Monitor Firestore usage and optimize if needed
 
 ---
 
@@ -225,18 +240,24 @@ Firestore
 ## 💾 Current Repository Status
 
 **Branch:** main  
-**Latest Commit:** 27aaec4  
+**Latest Commit:** 03b34ee (deploy: move dist contents to root for GitHub Pages)  
 **Working Directory:** Clean  
-**Remote:** All changes pushed to GitHub
+**Remote:** All changes pushed to GitHub  
+**Pages Status:** ✅ Live at https://petehep.github.io/interactive-Aus-map/ (temporary config)  
+**Build Status:** ✅ npm run build successful (894KB JS, ~236KB gzipped)
 
 ---
 
 ## 🏁 Summary
 
-Australia Trip Scheduler v3.0 now features complete cloud database integration with Firestore. All trip data (favorites, visited places, itineraries) synchronizes in real-time across all devices when users log in. Two critical bugs discovered during testing were fixed, and comprehensive documentation was created.
+Australia Trip Scheduler v6.0 features:
+- **UI Polish:** Pinned sidebar header with 3×3 button grid, independent scrolling
+- **Cloud Sync:** Real-time Firestore data synchronization across devices
+- **Security:** User-specific data isolation with Firestore rules
+- **Deployment:** Currently live on GitHub Pages (temporary root-level deployment)
 
-**The application is production-ready and fully tested.**
+**Next Phase:** Implement proper GitHub Actions workflow deployment to `gh-pages` branch to clean up source repository.
 
 ---
 
-*Generated: December 12, 2025 | Australia Trip Scheduler Project*
+*Updated: December 14, 2025 | Australia Trip Scheduler v6.0*
