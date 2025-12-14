@@ -1,0 +1,127 @@
+
+[1m═══ Australia Trip Scheduler - Test Suite v3.0 ═══[0m
+Started: 12/12/2025, 7:13:33 PM
+Environment: darwin | Node 22.14.0
+
+
+[34m▶[0m Project Structure & Files
+  [32m✓[0m src/ directory exists
+  [32m✓[0m src/components/ directory exists
+  [32m✓[0m src/services/ directory exists
+  [32m✓[0m public/ directory exists
+  [32m✓[0m src/App.tsx exists
+  [32m✓[0m src/firebase.ts exists
+  [32m✓[0m src/services/firestoreService.ts exists
+  [32m✓[0m src/components/MapView.tsx exists
+  [32m✓[0m src/components/Login.tsx exists
+  [32m✓[0m src/components/Favorites.tsx exists
+  [32m✓[0m src/components/Itinerary.tsx exists
+  [32m✓[0m src/components/VisitedPlaces.tsx exists
+  [32m✓[0m src/index.css exists
+  [32m✓[0m src/main.tsx exists
+  [32m✓[0m package.json exists
+  [32m✓[0m tsconfig.json exists
+  [32m✓[0m vite.config.ts exists
+  [32m✓[0m firestore.rules exists
+  [32m✓[0m index.html exists
+
+[34m▶[0m Firestore Integration
+  [32m✓[0m firestoreService.ts exists
+  [32m✓[0m Exports saveFavorite
+  [32m✓[0m Exports deleteFavorite
+  [32m✓[0m Exports getFavorites
+  [32m✓[0m Exports subscribeFavorites
+  [32m✓[0m Exports saveVisitedPlace
+  [32m✓[0m Exports deleteVisitedPlace
+  [32m✓[0m Exports getVisitedPlaces
+  [32m✓[0m Exports subscribeVisitedPlaces
+  [32m✓[0m Exports saveItinerary
+  [32m✓[0m Exports getItinerary
+  [32m✓[0m Exports subscribeItinerary
+  [32m✓[0m sanitizeId function exists
+  [32m✓[0m sanitizeId handles slash replacement
+  [32m✓[0m Migration function exists
+  [32m✓[0m Real-time listeners implemented (onSnapshot)
+  [32m✓[0m Unsubscribe pattern implemented
+
+[34m▶[0m Authentication System
+  [32m✓[0m firebase.ts exists
+  [32m✓[0m Exports auth
+  [32m✓[0m Exports db (Firestore)
+  [32m✓[0m Firebase app initialized
+  [32m✓[0m Authentication service initialized
+  [32m✓[0m Firestore service initialized
+  [32m✓[0m Uses environment variables for config
+  [32m✓[0m App.tsx uses onAuthStateChanged listener
+  [32m✓[0m Sign in handler implemented
+  [32m✓[0m Sign up handler implemented
+  [32m✓[0m Sign out handler exists
+
+[34m▶[0m Component Implementation
+  [32m✓[0m MapView imports Leaflet
+  [32m✓[0m MapView has favorite toggle
+  [32m✓[0m MapView has async error handling for favorites
+  [32m✓[0m MapView handles visited places
+  [32m✓[0m Login component has form inputs
+  [32m✓[0m Login component has sign in/up
+  [32m✓[0m App.tsx uses React hooks
+  [32m✓[0m App.tsx has toggleFavorite function
+  [32m✓[0m App.tsx has favorites state
+  [32m✓[0m App.tsx has visited places state
+  [32m✓[0m App.tsx has itinerary state
+
+[34m▶[0m Configuration Files
+  [32m✓[0m vite.config.ts uses defineConfig
+  [32m✓[0m vite.config.ts has base path
+  [32m✓[0m tsconfig.json has strict mode
+  [32m✓[0m tsconfig.json targets modern ES
+  [32m✓[0m package.json has dev script
+  [32m✓[0m package.json has build script
+  [32m✓[0m package.json configured as ES module
+
+[34m▶[0m Security & Best Practices
+  [32m✓[0m firestore.rules exists
+  [32m✓[0m Rules check authentication
+  [32m✓[0m Rules enforce user isolation
+  [32m✓[0m Rules define data collections
+  [32m✓[0m Firebase keys use environment variables
+  [32m✓[0m .env.example exists
+  [32m✓[0m .gitignore excludes .env
+  [32m✓[0m .gitignore excludes node_modules
+
+[34m▶[0m Documentation
+  [32m✓[0m Technical Documentation exists
+  [32m✓[0m Firestore Setup Guide exists
+  [32m✓[0m Session Summary exists
+  [32m✓[0m README exists
+  [32m✓[0m Technical docs mention Firestore
+  [32m✓[0m Technical docs mention real-time sync
+  [32m✓[0m Technical docs explain ID sanitization
+
+[34m▶[0m Git & Version Control
+  [32m✓[0m .git directory exists
+  [32m✓[0m .gitignore exists
+
+[34m▶[0m Package Dependencies
+  [32m✓[0m react installed
+  [32m✓[0m react-dom installed
+  [32m✓[0m typescript installed
+  [32m✓[0m firebase installed
+  [32m✓[0m leaflet installed
+  [32m✓[0m react-leaflet installed
+  [32m✓[0m vite installed
+
+[34m▶[0m Code Quality
+  [32m✓[0m firestoreService has documentation comments
+  [32m✓[0m firestoreService has error handling
+  [32m✓[0m src/App.tsx uses console for debugging
+  [32m✓[0m src/services/firestoreService.ts uses console for debugging
+
+[1m═══ Test Results Summary ═══[0m
+  Total Tests: 93
+  [32mPassed: 93[0m
+  [31mFailed: 0[0m
+  Pass Rate: [32m100.00%[0m
+
+[32m✓ All 93 tests passed![0m
+

@@ -98,6 +98,12 @@ function StartSelector({ selectingStart, onStartSelected }: { selectingStart?: b
   return null
 }
 
+// Generate Wikipedia search URL for a place
+function getWikipediaUrl(placeName: string): string {
+  const searchQuery = encodeURIComponent(placeName)
+  return `https://en.wikipedia.org/wiki/Special:Search?search=${searchQuery}`
+}
+
 function CenterOnStart({ startLocation }: { startLocation?: StartLocation }){
   const map = useMap()
   React.useEffect(() => {
@@ -627,14 +633,22 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
                     )
                   })()}
                   <div style={{ color: '#475569', marginBottom: 8 }}>{p.type} \u00b7 {p.lat.toFixed(3)}, {p.lon.toFixed(3)}</div>
-                  <div style={{ marginBottom: 8 }}>
+                  <div style={{ marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <a 
+                      href={getWikipediaUrl(p.name)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: 12, color: '#2563eb' }}
+                    >
+                      📖 Wikipedia →
+                    </a>
                     <a 
                       href={`https://www.meteoblue.com/en/weather/forecast/week/${p.lat.toFixed(4)}N${p.lon.toFixed(4)}E`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ fontSize: 12, color: '#2563eb' }}
                     >
-                      Weather forecast →
+                      🌤️ Weather forecast →
                     </a>
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
