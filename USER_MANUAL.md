@@ -351,7 +351,7 @@ You can work with multiple routes:
 4. Each route is independent and doesn't affect others
 
 
-Favorites let you save places you want to remember or visit later.
+Favorites let you save places you want to remember or visit later. The right sidebar keeps the itinerary title and buttons pinned at the top while the itinerary list and Favorites scroll together inside the sidebar (the map stays fixed).
 
 ### Adding to Favorites
 
@@ -366,8 +366,8 @@ Favorites let you save places you want to remember or visit later.
 
 ### Viewing Your Favorites
 
-1. Look in the **left sidebar**
-2. Find the **"Favorites"** section
+1. Look in the **right sidebar** (scroll inside the itinerary column, not the whole page)
+2. Find the **"Favorites"** section under your itinerary list
 3. Your favorites are **organized by Australian state**:
    - New South Wales
    - Victoria
