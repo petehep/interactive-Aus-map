@@ -209,17 +209,14 @@ Firestore
 
 ---
 
-## 🎯 Next Steps (Deployment Cleanup - IN PROGRESS)
+## ✅ Deployment Complete (v6.0 Production)
 
-### Current Task: Implement Proper GitHub Pages Deployment
-1. **Remove build artifacts from root** - Clean up `index.html`, `assets/`, `user-manual.html` from repo root
-2. **Restore `.gitignore`** - Add `dist/` back to ignore list (build artifacts should not be in source control)
-3. **Trigger Actions workflow** - Commit changes to main branch; `.github/workflows/deploy.yml` will automatically:
-   - Build the project
-   - Test the build
-   - Deploy built artifacts to `gh-pages` branch
-4. **Configure Pages to use `gh-pages`** - Set GitHub Pages source to `gh-pages` branch + `/ (root)` folder
-5. **Verify deployment** - Site will be live at https://petehep.github.io/interactive-Aus-map/ with clean source repo
+### GitHub Pages Deployment - DONE
+1. ✅ **Removed build artifacts from root** - Cleaned up `index.html`, `assets/`, `user-manual.html` from repo root
+2. ✅ **Restored `.gitignore`** - Added `dist/` back to ignore list (build artifacts no longer in source control)
+3. ✅ **Created `gh-pages` branch** - Used `git subtree push --prefix dist origin gh-pages` to deploy built artifacts
+4. ✅ **Configured Pages** - GitHub Pages source set to `gh-pages` branch + `/ (root)` folder
+5. ✅ **Live deployment** - Site now live at https://petehep.github.io/interactive-Aus-map/ with clean source repo
 
 ### Future Sessions
 1. Monitor site performance post-deployment
@@ -239,12 +236,22 @@ Firestore
 
 ## 💾 Current Repository Status
 
-**Branch:** main  
-**Latest Commit:** 03b34ee (deploy: move dist contents to root for GitHub Pages)  
-**Working Directory:** Clean  
-**Remote:** All changes pushed to GitHub  
-**Pages Status:** ✅ Live at https://petehep.github.io/interactive-Aus-map/ (temporary config)  
-**Build Status:** ✅ npm run build successful (894KB JS, ~236KB gzipped)
+**Source Repository (main branch):**
+- ✅ Clean - no build artifacts
+- ✅ All source code, configs, and documentation intact
+- ✅ `.gitignore` properly configured (excludes `dist/` and `build/`)
+- ✅ Latest commit: 65614c9 (refactor: remove build artifacts, restore dist to gitignore)
+
+**Deployment (gh-pages branch):**
+- ✅ Created via `git subtree push --prefix dist origin gh-pages`
+- ✅ Contains only built artifacts: `index.html`, `assets/`, etc.
+- ✅ Configured as GitHub Pages source in Settings
+
+**Live Site:**
+- 🌐 https://petehep.github.io/interactive-Aus-map/
+- ✅ Serving from `gh-pages` branch
+- ✅ v6.0 UI and all features live
+- Build: 894KB JS, ~236KB gzipped
 
 ---
 
