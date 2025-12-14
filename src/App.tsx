@@ -4,6 +4,8 @@ import Itinerary from './components/Itinerary'
 import Favorites from './components/Favorites'
 import VisitedPlaces from './components/VisitedPlaces'
 import ShareItinerary from './components/ShareItinerary'
+import BrowseRoutes from './components/BrowseRoutes'
+import SaveRouteModal from './components/SaveRouteModal'
 import Login from './components/Login'
 import { auth } from './firebase'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
@@ -65,6 +67,8 @@ export default function App() {
   const [visitedPlaces, setVisitedPlaces] = useState<Place[]>([])
   const [showVisitedModal, setShowVisitedModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
+  const [showBrowseModal, setShowBrowseModal] = useState(false)
+  const [showSaveModal, setShowSaveModal] = useState(false)
   const [mapRef, setMapRef] = useState<any>(null)
 
   const onAddPlace = useCallback((p: Place) => {
@@ -788,7 +792,7 @@ export default function App() {
               >
                 {showFuelStations ? 'Hide Fuel' : 'Show Fuel'}
               </button>
-              <button className="button" onClick={exportItinerary} disabled={itinerary.length === 0} title="Download itinerary as JSON">Save itinerary</button>
+              <button className="button" onClick={() => setShowSaveModal(true)} disabled={itinerary.length === 0} title="Save this route to your account">💾 Save Route</button>
               <button 
                 className="button" 
                 onClick={() => setShowVisitedModal(true)} 
@@ -805,7 +809,7 @@ export default function App() {
               >
                 {showDumpPoints ? 'Hide Dumps' : 'Show Dumps'}
               </button>
-              <button className="button" onClick={() => fileInputRef.current?.click()} title="Load itinerary from JSON file">Load itinerary</button>
+              <button className="button" onClick={() => setShowBrowseModal(true)} title="Load a saved route or browse shared routes">📂 Load Route</button>
               <button className="button" onClick={clearItinerary} disabled={itinerary.length === 0} title="Remove all stops from itinerary">Clear itinerary</button>
               <button 
                 className="button" 
@@ -897,6 +901,21 @@ export default function App() {
         </div>
       )}
       <ShareItinerary itinerary={itinerary} isOpen={showShareModal} onClose={() => setShowShareModal(false)} />
+      <SaveRouteModal 
+        isOpen={showSaveModal} 
+        onClose={() => setShowSaveModal(false)}
+        itinerary={itinerary}
+      />
+      <BrowseRoutes 
+        isOpen={showBrowseModal} 
+        onClose={() => setShowBrowseModal(false)}
+        onLoadRoute={(loadedItinerary) => {
+          setItinerary(loadedItinerary)
+          if (user) {
+            saveItinerary(user.uid, loadedItinerary).catch(console.error)
+          }
+        }}
+      />
     </div>
   )
 }

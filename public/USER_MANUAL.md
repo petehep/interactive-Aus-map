@@ -289,28 +289,58 @@ You can also manage attachments directly from your **Itinerary** list. Each stop
 
 ## Saving & Sharing Routes
 
-### Saving Your Route
+### Saving Routes to Your Account
 
-You can save your itinerary (list of stops) as a file to your computer and reload it later.
+All your routes are automatically saved to the cloud and accessible from any device!
 
-**To Save Your Route:**
+**Automatic Saving:**
+- Your current itinerary is **auto-saved** as you add or remove stops
+- No need to manually save - it's always backed up to your account
+- Access your route from any device by signing in
+
+**Saving Named Routes:**
+
+Want to save multiple different route plans? You can save as many as you like!
+
 1. Build your itinerary with all your stops
-2. Click **"Save itinerary"** button (right sidebar)
-3. A file will download to your computer named `itinerary-YYYYMMDD.json`
-4. Save this file safely on your device
+2. Click **"💾 Save Route"** button (right sidebar)
+3. A dialog opens - enter a name for your route:
+   - Examples: "Tasmania Loop", "Great Ocean Road", "Outback Adventure"
+4. Click **"Save Route"**
+5. Your route is saved to the cloud with that name
 
-**To Load a Saved Route:**
-1. Click **"Load itinerary"** button (right sidebar)
-2. Select your saved `itinerary-YYYYMMDD.json` file
-3. Your stops will be loaded into the app
-4. **IMPORTANT:** You must set a start location before viewing the route
-   - Type a city name in the start location search field OR
-   - Click "Set as start" on any marker or itinerary item
-5. Click **"Update Route"** to see the blue route line on the map
+**Benefits:**
+- Keep multiple route ideas saved
+- Switch between different plans easily
+- Never lose your work
+- Access from any device
+
+### Loading Your Saved Routes
+
+**To Load a Route:**
+
+1. Click **"📂 Load Route"** button (right sidebar)
+2. A dialog opens showing two sections:
+
+**📂 My Saved Routes** (your personal routes)
+- Shows all routes you've saved
+- Includes your current route
+- Click **"Load This Route"** on any route to switch to it
+
+**🌐 Shared by Others** (public shared routes)
+- Browse routes shared by other users
+- See stops, distance, and when shared
+- Click **"Load This Route"** to try their route
+
+3. The selected route loads into your itinerary
+4. **IMPORTANT:** Set a start location before viewing:
+   - Type a city name in the start location search OR
+   - Click "Set as start" on any itinerary item
+5. Click **"Update Route"** to see the route on the map
 
 ### Sharing Your Route
 
-Share your planned route with friends, family, or other travelers!
+Share your planned route with friends, family, or the community!
 
 **To Share a Route:**
 1. Build your itinerary with all your stops
@@ -318,36 +348,59 @@ Share your planned route with friends, family, or other travelers!
 3. A dialog opens with:
    - **Title field** (e.g., "Australian East Coast Road Trip")
    - **Description field** (optional, e.g., "2 weeks, Sydney to Melbourne")
-4. Click **"Share"** button
-5. A unique **share link** appears - copy it!
-6. Send the link to friends via email, messaging, or social media
+4. Click **"Generate Share Link"**
+5. Your route is:
+   - **Added to "Shared by Others"** - visible in Browse Routes
+   - **Shareable via direct link** - copy the link shown
+6. Share the link via email, messaging, or social media
+
+**What Gets Shared:**
+- All stops in your itinerary
+- Route title and description
+- When you shared it
+- **NOT included:** Attachments (photos/notes) remain private
 
 **Receiving a Shared Route:**
+
+**Option 1: Via Direct Link**
 1. Click on the share link sent by your friend
 2. The app opens with their itinerary loaded
-3. **IMPORTANT:** Follow these steps to view the route:
-   - Click on any stop in the itinerary
-   - Click **"Set as start"** on the place you want to start from
-   - Click **"Update Route"** button to calculate the route
-   - The blue route line will appear on the map
-4. You can now:
-   - View the full planned route
-   - Add more stops if desired
-   - Click "Save itinerary" to keep a copy
-   - Make changes to the route (it won't affect the original)
+3. Set a start location and click "Update Route"
+4. You can save it to your account to keep a copy
+
+**Option 2: Via Browse Routes**
+1. Click **"📂 Load Route"**
+2. Scroll to **"🌐 Shared by Others"** section
+3. Browse all public shared routes
+4. Click **"Load This Route"** on any route you like
 
 **Important Notes:**
-- Shared routes do NOT include any attachments for privacy
-- Anyone with the link can view the route
-- You can save a received route to keep your own copy
-- Modifications you make do not affect the original shared route
+- Anyone can see shared routes in Browse Routes
+- Direct links let you share privately via email/text
+- Loading a shared route creates your own copy
+- Your changes don't affect the original shared route
+- Attachments are never shared (privacy protection)
 
-### Viewing Multiple Routes
+### Managing Multiple Routes
 
-You can work with multiple routes:
-1. **Save routes** frequently as you make changes
-2. **Load different routes** using the "Load itinerary" button
-3. **Share routes** with different groups of people
+Work with as many routes as you need:
+
+**Create Multiple Plans:**
+- Plan different trips: "Summer Road Trip", "Winter Escape", "Weekend Getaway"
+- Compare routes: "Coastal Route" vs "Inland Route"
+- Future trips: "2025 Tasmania", "2026 Northern Territory"
+
+**Switch Between Routes:**
+1. Click **"📂 Load Route"**
+2. All your saved routes appear in **"📂 My Saved Routes"**
+3. Click any route to load it
+4. Your previous route is still saved - switch back anytime!
+
+**Best Practices:**
+- Save routes with descriptive names
+- Create new saved routes for major changes
+- Use Share to collaborate with travel buddies
+- Browse shared routes for inspiration
 4. Each route is independent and doesn't affect others
 
 

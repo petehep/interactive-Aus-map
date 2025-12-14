@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { createShareableRoute, generateShareUrl } from '../services/routeShareService'
+import { createShareableRoute, generateShareUrl, saveSharedRoute } from '../services/routeShareService'
+import { auth } from '../firebase'
 
 type ItineraryItem = {
   id: string
@@ -21,26 +22,41 @@ export default function ShareItinerary({ itinerary, isOpen, onClose }: Props) {
   const [description, setDescription] = useState('')
   const [shareUrl, setShareUrl] = useState('')
   const [copied, setCopied] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   if (!isOpen) return null
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!title.trim()) {
       alert('Please enter a title for your route')
       return
     }
 
+    const user = auth.currentUser
+    if (!user) {
+      alert('You must be logged in to share routes')
+      return
+    }
+
+    setSaving(true)
     try {
       const shareableRoute = createShareableRoute(
         itinerary,
         title.trim(),
         description.trim()
       )
+      
+      // Save to Firestore for public browsing
+      await saveSharedRoute(shareableRoute, user.uid)
+      
+      // Generate URL for direct sharing
       const url = generateShareUrl(shareableRoute)
       setShareUrl(url)
     } catch (error) {
-      console.error('Error generating share URL:', error)
-      alert('Failed to generate share link')
+      console.error('Error sharing route:', error)
+      alert('Failed to share route')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -151,8 +167,13 @@ export default function ShareItinerary({ itinerary, isOpen, onClose }: Props) {
             </div>
 
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="button" onClick={handleShare} style={{ flex: 1 }}>
-                Generate Share Link
+              <button 
+                className="button" 
+                onClick={handleShare} 
+                style={{ flex: 1 }}
+                disabled={saving}
+              >
+                {saving ? 'Sharing...' : 'Generate Share Link'}
               </button>
               <button className="button" onClick={onClose} style={{ background: '#94a3b8' }}>
                 Cancel
@@ -162,7 +183,7 @@ export default function ShareItinerary({ itinerary, isOpen, onClose }: Props) {
         ) : (
           <>
             <div style={{ marginBottom: 16, padding: 12, background: '#f0fdf4', borderRadius: 6, fontSize: 13, color: '#16a34a' }}>
-              ✓ Share link generated! Copy and share with others.
+              ✓ Route shared successfully! It's now visible in Browse Routes and you can share this direct link.
             </div>
 
             <div style={{ marginBottom: 16 }}>

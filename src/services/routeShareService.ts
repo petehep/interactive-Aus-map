@@ -3,6 +3,9 @@
  * Encodes and decodes itinerary data for shareable URLs
  */
 
+import { collection, addDoc } from 'firebase/firestore'
+import { db } from '../firebase'
+
 export interface ShareableRoute {
   title: string
   description: string
@@ -102,3 +105,28 @@ export function createShareableRoute(
     createdAt: Date.now()
   }
 }
+
+/**
+ * Save a shared route to Firestore for public browsing
+ * Returns the document ID
+ */
+export async function saveSharedRoute(
+  route: ShareableRoute,
+  userId: string
+): Promise<string> {
+  try {
+    const sharedRoutesRef = collection(db, 'sharedRoutes')
+    const docRef = await addDoc(sharedRoutesRef, {
+      title: route.title,
+      description: route.description,
+      itinerary: route.stops,
+      createdAt: route.createdAt,
+      userId: userId
+    })
+    return docRef.id
+  } catch (error) {
+    console.error('Error saving shared route:', error)
+    throw new Error('Failed to save shared route')
+  }
+}
+
