@@ -32,7 +32,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.min.css" />
 </head>
 <body class="markdown-body">
-<a href="/interactive-Aus-map/" class="back-button">← Back to App</a><header id="title-block-header">
+<header id="title-block-header">
 <h1 class="title">Australia Trip Scheduler - User Manual</h1>
 </header>
 <h1 id="australia-trip-scheduler---user-manual">Australia Trip Scheduler
