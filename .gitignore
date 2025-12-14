@@ -6,6 +6,22 @@ node_modules/
 build/
 dist/
 
+# Documentation (kept locally, not in repo)
+*.md
+*.pdf
+!vite.config.ts
+README.md
+USER_MANUAL*.md
+USER_MANUAL*.pdf
+TECHNICAL_DOCUMENTATION*.md
+TECHNICAL_DOCUMENTATION*.pdf
+FIRESTORE_SETUP.md
+FIRESTORE_SETUP.pdf
+STORAGE_SETUP.md
+SESSION_SUMMARY*.md
+TESTING_RESULTS*.md
+SECURITY_FIX_INSTRUCTIONS.md
+
 # Environment
 .env
 .env.local
