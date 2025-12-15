@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      env:
-        VITE_VERSION: ${{ github.sha }}
+    env:
+      VITE_VERSION: ${{ github.sha }}
     permissions:
       contents: read
       pages: write
