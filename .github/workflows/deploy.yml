@@ -28,7 +28,7 @@ jobs:
         run: npm install
 
       - name: Install Pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc wkhtmltopdf
 
       - name: Generate PDF User Manual (v6.0)
         run: |
@@ -43,7 +43,8 @@ jobs:
             -V date:"$(date -u '+%Y-%m-%d %H:%M UTC')" \
             -V pagestyle:plain \
             -V header-left:"Aus Trip Scheduler — User Manual v6.0" \
-            -V footer-right:"Page \thepage"
+            -V footer-right:"Page \\thepage" \
+            --pdf-engine=wkhtmltopdf
           rm -f docs/pdf-cover.tmp.md
         
       - name: Build
