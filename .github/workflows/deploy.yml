@@ -31,7 +31,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y pandoc
 
       - name: Generate PDF User Manual (v6.0)
-        run: pandoc USER_MANUAL.md -o public/USER_MANUAL_v6.0.pdf
+        run: |
+          pandoc USER_MANUAL.md \
+            -o public/USER_MANUAL_v6.0.pdf \
+            --from markdown \
+            --toc \
+            -V geometry:margin=1in \
+            -V title:"Aus Trip Scheduler — User Manual v6.0" \
+            -V author:"petehep" \
+            -V date:"$(date -u '+%Y-%m-%d %H:%M UTC')"
         
       - name: Build
         env:
