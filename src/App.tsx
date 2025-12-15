@@ -605,12 +605,20 @@ export default function App() {
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 6 }}>
               <a 
                 className="button small" 
-                href="/interactive-Aus-map/user-manual.html" 
+                href="/interactive-Aus-map/USER_MANUAL_v6.0.pdf" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                title="Open the latest User Manual"
+                title="Open the latest User Manual (PDF)"
               >
-                📘 User Manual
+                📘 User Manual (PDF)
+              </a>
+              <a 
+                className="button small" 
+                href="/interactive-Aus-map/USER_MANUAL_v6.0.pdf" 
+                download 
+                title="Download the latest User Manual (PDF)"
+              >
+                ⬇︎ Download
               </a>
               <button 
                 className="button small"
@@ -926,7 +934,8 @@ export default function App() {
               <li>🎨 Professional 3D beveled button styling throughout the app.</li>
             </ul>
             <div style={{ marginTop: 12 }}>
-              <a href="/interactive-Aus-map/user-manual.html" target="_blank" rel="noopener noreferrer" className="button">Read the Manual</a>
+              <a href="/interactive-Aus-map/USER_MANUAL_v6.0.pdf" target="_blank" rel="noopener noreferrer" className="button">Read the Manual (PDF)</a>
+              <a href="/interactive-Aus-map/USER_MANUAL_v6.0.pdf" download className="button small" style={{ marginLeft: 8 }}>Download PDF</a>
             </div>
           </div>
         </div>
