@@ -27,8 +27,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
       - name: Generate PDF User Manual (v6.0)
-        run: npx -y md-to-pdf USER_MANUAL.md --output public/USER_MANUAL_v6.0.pdf
+        run: pandoc USER_MANUAL.md -o public/USER_MANUAL_v6.0.pdf
         
       - name: Build
         env:
