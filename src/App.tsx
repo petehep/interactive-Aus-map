@@ -47,6 +47,7 @@ type GeoResult = {
 }
 
 export default function App() {
+  const buildVersion = (import.meta.env.VITE_VERSION as string | undefined) || 'local-dev'
   const [user, setUser] = useState<any>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [itinerary, setItinerary] = useState<ItineraryItem[]>([])
@@ -930,6 +931,9 @@ export default function App() {
           </div>
         </div>
       )}
+      <div className="build-badge" title={`Build commit: ${buildVersion}`}>
+        Build: {buildVersion.slice(0, 7)}
+      </div>
       <ShareItinerary itinerary={itinerary} isOpen={showShareModal} onClose={() => setShowShareModal(false)} />
       <SaveRouteModal 
         isOpen={showSaveModal} 
