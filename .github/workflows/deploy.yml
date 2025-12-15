@@ -32,14 +32,19 @@ jobs:
 
       - name: Generate PDF User Manual (v6.0)
         run: |
-          pandoc USER_MANUAL.md \
+          sed "s/{{DATE}}/$(date -u '+%Y-%m-%d %H:%M UTC')/" docs/pdf-cover.md > docs/pdf-cover.tmp.md
+          pandoc docs/pdf-cover.tmp.md USER_MANUAL.md \
             -o public/USER_MANUAL_v6.0.pdf \
             --from markdown \
             --toc \
             -V geometry:margin=1in \
             -V title:"Aus Trip Scheduler — User Manual v6.0" \
             -V author:"petehep" \
-            -V date:"$(date -u '+%Y-%m-%d %H:%M UTC')"
+            -V date:"$(date -u '+%Y-%m-%d %H:%M UTC')" \
+            -V pagestyle:plain \
+            -V header-left:"Aus Trip Scheduler — User Manual v6.0" \
+            -V footer-right:"Page \thepage"
+          rm -f docs/pdf-cover.tmp.md
         
       - name: Build
         env:
