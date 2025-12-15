@@ -1,4 +1,5 @@
 # Australia Trip Scheduler - User Manual
+**Version 5.0 | December 14, 2025**
 
 Welcome to your Australia Trip Planning Companion! This app helps you plan, organize, and track your caravan or RV adventures across Australia.
 
@@ -893,6 +894,45 @@ A: Ask your friend who shared this app with you, or report issues on GitHub.
 
 ---
 
+## Version History
+
+### Version 5.0 (December 14, 2025)
+**Cloud-Based Route Management**
+- 💾 **Save Route:** Save multiple named routes to your cloud account
+- 📂 **Load Route:** Browse and load your saved routes or discover shared routes
+- 🗺️ **Browse Routes:** View all your saved routes and routes shared by the community
+- 📤 **Enhanced Sharing:** Shared routes now appear in Browse Routes for others to discover
+- **Removed:** File-based save/load workflow (replaced with seamless cloud storage)
+- **UI:** Reduced button sizes for cleaner appearance
+
+### Version 4.0 (December 2025)
+**Attachments & Visual Updates**
+- 📎 File attachments (photos, PDFs, documents)
+- 🎨 Professional 3D button styling
+- 📢 "What's New" modal for feature announcements
+- Updated documentation
+
+### Version 3.0 (November 2025)
+**Cloud Synchronization**
+- ☁️ Cloud Firestore integration
+- 🔄 Real-time synchronization across devices
+- 🔐 Enhanced security and authentication
+- Multi-device support
+
+### Version 2.0 (2025)
+**Route Planning**
+- 🗺️ Route planning with distance calculations
+- 📍 Multiple service markers (fuel, shops, etc.)
+- 🔍 Advanced filtering options
+
+### Version 1.0 (2024)
+**Initial Release**
+- 🗺️ Interactive map of Australia
+- ⭐ Favorites and basic itinerary
+- 💾 Local storage persistence
+
+---
+
 ## Happy Travels! 🚐🦘🌏
 
 Explore Australia at your own pace. From the red center to tropical coasts, from bustling cities to tiny outback towns - this app is your companion for discovering this incredible country.
@@ -908,5 +948,6 @@ Explore Australia at your own pace. From the red center to tropical coasts, from
 
 ---
 
-*Last Updated: December 12, 2025*  
-*Version: 3.0 (with Cloud Synchronization)*
+*User Manual Version 5.0*  
+*Last Updated: December 14, 2025*
+
