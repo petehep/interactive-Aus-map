@@ -63,6 +63,8 @@ export default function App() {
   const [showWaterPoints, setShowWaterPoints] = useState(false)
   const [showSmallTownsOnly, setShowSmallTownsOnly] = useState(false)
   const [showCampsites, setShowCampsites] = useState(true)
+  const [showHikes, setShowHikes] = useState(false)
+  const [show4WDTracks, setShow4WDTracks] = useState(false)
   const [favorites, setFavorites] = useState<Place[]>([])
   const [visitedPlaces, setVisitedPlaces] = useState<Place[]>([])
   const [showVisitedModal, setShowVisitedModal] = useState(false)
@@ -161,26 +163,26 @@ export default function App() {
     await saveFavorite(user.uid, updatedFavorite)
   }, [user, favorites])
 
-  const toggleVisited = useCallback(async (id: string) => {
+  const toggleVisited = useCallback(async (id: string, place?: Place) => {
     if (!user) return
-    
-    const favorite = favorites.find(f => f.id === id)
-    if (!favorite) return
     
     const isCurrentlyVisited = visitedPlaces.some(p => p.id === id)
     
     if (isCurrentlyVisited) {
       // Unvisit
       await deleteVisitedPlace(user.uid, id)
-      // Update favorite - remove visited fields
-      const { visited, visitedAt, ...cleanFavorite } = favorite
-      await saveFavorite(user.uid, { ...cleanFavorite, visited: false })
     } else {
-      // Visit
-      const visitedPlace = { ...favorite, visited: true, visitedAt: Date.now() }
-      await saveVisitedPlace(user.uid, visitedPlace)
-      // Update favorite
-      await saveFavorite(user.uid, visitedPlace)
+      // Visit - use the favorite if available, otherwise create from place prop
+      const favorite = favorites.find(f => f.id === id)
+      if (favorite) {
+        const visitedPlace = { ...favorite, visited: true, visitedAt: Date.now() }
+        await saveVisitedPlace(user.uid, visitedPlace)
+        await saveFavorite(user.uid, visitedPlace)
+      } else if (place) {
+        // If not a favorite, just save as visited place
+        const visitedPlace = { ...place, visited: true, visitedAt: Date.now() }
+        await saveVisitedPlace(user.uid, visitedPlace)
+      }
     }
   }, [user, favorites, visitedPlaces])
 
@@ -696,6 +698,28 @@ export default function App() {
                 <span style={{ fontSize: 10, marginTop: 2 }}>{showCampsites ? 'Enabled' : 'Disabled'}</span>
               </div>
             </button>
+            <button 
+              className="button small" 
+              onClick={() => setShowHikes(!showHikes)} 
+              title="Show/hide hiking trail markers"
+              style={{ background: showHikes ? '#ef4444' : '#10b981' }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span>🥾 Show Hikes</span>
+                <span style={{ fontSize: 10, marginTop: 2 }}>{showHikes ? 'Enabled' : 'Disabled'}</span>
+              </div>
+            </button>
+            <button 
+              className="button small" 
+              onClick={() => setShow4WDTracks(!show4WDTracks)} 
+              title="Show/hide 4WD tracks and off-road trails"
+              style={{ background: show4WDTracks ? '#ef4444' : '#10b981' }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span>🚙 Show 4WD Tracks</span>
+                <span style={{ fontSize: 10, marginTop: 2 }}>{show4WDTracks ? 'Enabled' : 'Disabled'}</span>
+              </div>
+            </button>
             <button className="button" onClick={updateRoute} disabled={isRouting || itinerary.length === 0}>
               {isRouting ? 'Routing…' : 'Update Route'}
             </button>
@@ -722,8 +746,11 @@ export default function App() {
             showWaterPoints={showWaterPoints}
             showSmallTownsOnly={showSmallTownsOnly}
             showCampsites={showCampsites}
+            showHikes={showHikes}
+            show4WDTracks={show4WDTracks}
             favorites={favorites}
             toggleFavorite={toggleFavorite}
+            toggleVisited={toggleVisited}
             itinerary={itinerary}
             onMapReady={setMapRef}
             visitedPlaces={visitedPlaces}
@@ -841,6 +868,9 @@ export default function App() {
               startLocation={startLocation}
               onUploadAttachment={handleUploadAttachment}
               onDeleteAttachment={handleDeleteAttachment}
+              onToggleVisited={toggleVisited}
+              onCenterMap={centerMap}
+              visitedPlaces={visitedPlaces}
             />
             <div style={{ marginTop: 24 }}>
               <h2 style={{ margin: '0 0 12px 0', fontSize: 18, fontWeight: 600 }}>❤️ Favorites ({favorites.length})</h2>

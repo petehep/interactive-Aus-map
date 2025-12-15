@@ -18,7 +18,7 @@ type Props = {
   onAddToItinerary: (place: Place) => void
   onRemove: (id: string) => void
   onCenterMap: (lat: number, lon: number) => void
-  onToggleVisited: (id: string) => void
+  onToggleVisited: (id: string, place?: any) => Promise<void>
   onUploadAttachment: (placeId: string, file: File) => Promise<void>
   onDeleteAttachment: (placeId: string, attachment: Attachment) => Promise<void>
 }
@@ -163,7 +163,7 @@ export default function Favorites({ favorites, onAddToItinerary, onRemove, onCen
                   className="button small"
                   onClick={async () => {
                     try {
-                      await onToggleVisited(place.id)
+                      await onToggleVisited(place.id, place)
                     } catch (error) {
                       console.error('Error toggling visited status:', error)
                     }
