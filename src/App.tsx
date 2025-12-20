@@ -72,6 +72,7 @@ export default function App() {
   const [showShareModal, setShowShareModal] = useState(false)
   const [showBrowseModal, setShowBrowseModal] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [showFavoritesModal, setShowFavoritesModal] = useState(false)
   const [mapRef, setMapRef] = useState<any>(null)
 
   const onAddPlace = useCallback((p: Place) => {
@@ -780,34 +781,31 @@ export default function App() {
         </div>
         <aside className="sidebar">
           <div className="sidebarHeader">
-            <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <span>Itinerary</span>
-              {route && route.legs && route.legs.length > 0 && (
-                <span style={{ fontSize: 14, fontWeight: 'normal', color: '#475569' }}>
-                  {(() => {
-                    const totalSeconds = route.legs.reduce((sum, leg) => sum + leg.duration, 0)
-                    const totalHours = totalSeconds / 3600
-                    
-                    if (totalHours >= 24) {
-                      const days = Math.floor(totalHours / 24)
-                      const hours = Math.floor(totalHours % 24)
-                      const minutes = Math.round((totalSeconds % 3600) / 60)
-                      return days > 0 && hours > 0 
-                        ? `${days}d ${hours}h ${minutes}m`
-                        : days > 0 
-                          ? `${days}d ${minutes}m`
-                          : `${hours}h ${minutes}m`
-                    }
-                    
-                    const hours = Math.floor(totalHours)
+            <h2 style={{ margin: 0, marginBottom: 8 }}>Itinerary</h2>
+            {route && route.legs && route.legs.length > 0 && (
+              <p style={{ margin: '0 0 12px 0', fontSize: 14, fontWeight: 'normal', color: '#475569' }}>
+                {(() => {
+                  const totalSeconds = route.legs.reduce((sum, leg) => sum + leg.duration, 0)
+                  const totalHours = totalSeconds / 3600
+                  
+                  if (totalHours >= 24) {
+                    const days = Math.floor(totalHours / 24)
+                    const hours = Math.floor(totalHours % 24)
                     const minutes = Math.round((totalSeconds % 3600) / 60)
-                    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
-                  })()}
-                </span>
-              )}
-            </h2>
-            <p style={{ margin: '0 0 8px 0', fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>Scroll down to view Favourites</p>
-            <div className="button-grid">
+                    return days > 0 && hours > 0 
+                      ? `${days}d ${hours}h ${minutes}m`
+                      : days > 0 
+                        ? `${days}d ${minutes}m`
+                        : `${hours}h ${minutes}m`
+                  }
+                  
+                  const hours = Math.floor(totalHours)
+                  const minutes = Math.round((totalSeconds % 3600) / 60)
+                  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+                })()}
+              </p>
+            )}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '8px', width: '100%' }}>
               <button 
                 className="button" 
                 onClick={() => setShowFuelStations(!showFuelStations)} 
@@ -815,15 +813,6 @@ export default function App() {
                 style={{ background: showFuelStations ? '#ef4444' : '#10b981' }}
               >
                 {showFuelStations ? 'Hide Fuel' : 'Show Fuel'}
-              </button>
-              <button className="button" onClick={() => setShowSaveModal(true)} disabled={itinerary.length === 0} title="Save this route to your account">💾 Save Route</button>
-              <button 
-                className="button" 
-                onClick={() => setShowVisitedModal(true)} 
-                title="View all places you've visited"
-                style={{ backgroundColor: visitedPlaces.length > 0 ? '#10b981' : undefined }}
-              >
-                📍 Show Visits ({visitedPlaces.length})
               </button>
               <button 
                 className="button" 
@@ -833,8 +822,6 @@ export default function App() {
               >
                 {showDumpPoints ? 'Hide Dumps' : 'Show Dumps'}
               </button>
-              <button className="button" onClick={() => setShowBrowseModal(true)} title="Load a saved route or browse shared routes">📂 Load Route</button>
-              <button className="button" onClick={clearItinerary} disabled={itinerary.length === 0} title="Remove all stops from itinerary">Clear itinerary</button>
               <button 
                 className="button" 
                 onClick={() => setShowWaterPoints(!showWaterPoints)} 
@@ -843,6 +830,27 @@ export default function App() {
               >
                 {showWaterPoints ? 'Hide Water' : 'Show Water'}
               </button>
+              <button 
+                className="button" 
+                onClick={() => setShowVisitedModal(true)} 
+                title="View all places you've visited"
+                style={{ backgroundColor: visitedPlaces.length > 0 ? '#10b981' : undefined }}
+              >
+                📍 Show Visits ({visitedPlaces.length})
+              </button>
+              <button 
+                className="button favorites-modal-button" 
+                onClick={() => setShowFavoritesModal(true)}
+                title="View your favorite places"
+                style={{ display: 'none' }}
+              >
+                ❤️ Favorites ({favorites.length})
+              </button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '12px', width: '100%' }}>
+              <button className="button" onClick={() => setShowSaveModal(true)} disabled={itinerary.length === 0} title="Save this route to your account">💾 Save Route</button>
+              <button className="button" onClick={() => setShowBrowseModal(true)} title="Load a saved route or browse shared routes">📂 Load Route</button>
+              <button className="button" onClick={clearItinerary} disabled={itinerary.length === 0} title="Remove all stops from itinerary">Clear Itinerary</button>
               <button className="button" onClick={() => setShowShareModal(true)} disabled={itinerary.length === 0} title="Share your route with others">📤 Share Route</button>
               <button 
                 className="button" 
@@ -932,6 +940,39 @@ export default function App() {
         Build: {buildVersion.slice(0, 7)}
       </div>
       <ShareItinerary itinerary={itinerary} isOpen={showShareModal} onClose={() => setShowShareModal(false)} />
+      {showFavoritesModal && (
+        <div
+          className="modalOverlay"
+          onClick={() => setShowFavoritesModal(false)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 9999
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ background: '#fff', borderRadius: 8, padding: 16, maxWidth: 520, width: '90%', maxHeight: '80vh', overflow: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>❤️ Favorites ({favorites.length})</h3>
+              <button className="button small" onClick={() => setShowFavoritesModal(false)}>Close</button>
+            </div>
+            <Favorites 
+              favorites={favorites} 
+              onAddToItinerary={onAddPlace} 
+              onRemove={removeFavorite}
+              onCenterMap={(lat, lon) => {
+                centerMap(lat, lon)
+                setShowFavoritesModal(false)
+              }}
+              onToggleVisited={toggleVisited}
+              onUploadAttachment={handleUploadAttachment}
+              onDeleteAttachment={handleDeleteAttachment}
+            />
+          </div>
+        </div>
+      )}
       <SaveRouteModal 
         isOpen={showSaveModal} 
         onClose={() => setShowSaveModal(false)}

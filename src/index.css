@@ -41,13 +41,20 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   padding: 12px;
   background: white;
   z-index: 10;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
 }
 
 .sidebarHeader h2 {
   font-size: 16px;
-  margin: 0 0 8px 0;
+  margin: 0 !important;
   padding: 0;
   border: none;
+}
+
+.sidebarHeader > div {
+  width: 100% !important;
 }
 
 .sidebarContent {
@@ -652,13 +659,15 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
     right: auto;
     width: 100%;
     min-width: auto;
-    max-height: none;
+    max-height: 35vh;
     height: auto;
+    overflow: hidden;
     border-left: none;
     border-top: 1px solid #e2e8f0;
     border-radius: 16px 16px 0 0;
     z-index: 100;
     display: flex;
+    flex-direction: column;
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
     background: #fff;
   }
@@ -689,6 +698,8 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
+    max-height: 150px;
   }
 
   .sidebarHeader h2 {
@@ -697,7 +708,20 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   }
 
   .sidebarContent {
-    max-height: calc(50vh - 70px);
+    max-height: calc(20vh - 40px) !important;
+    overflow-y: auto !important;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebarContent > div:last-child {
+    display: none !important;
+  }
+
+  .favorites-modal-button {
+    display: inline-block !important;
   }
 
   .button {
@@ -721,6 +745,10 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   
   /* Hide the Enabled/Disabled status text on mobile */
   .button.toggle-button > div > span:last-child {
+    display: none !important;
+  }
+
+  .build-badge {
     display: none !important;
   }
 
