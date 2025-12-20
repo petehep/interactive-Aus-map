@@ -642,9 +642,55 @@ export default function App() {
             )}
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center', flexGrow: 1 }}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input
+          <div className="button-container" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button 
+              className="button toggle-button" 
+              onClick={() => setShowSmallTownsOnly(!showSmallTownsOnly)} 
+              title="Show only towns with population under 10,000"
+              style={{ background: showSmallTownsOnly ? '#ef4444' : '#10b981' }}
+            >
+              Small Towns {showSmallTownsOnly ? '✓' : ''}
+            </button>
+            <button 
+              className="button toggle-button" 
+              onClick={() => setShowCampsites(!showCampsites)} 
+              title="Show/hide campsite markers"
+              style={{ background: showCampsites ? '#10b981' : '#ef4444' }}
+            >
+              Campsites {showCampsites ? '✓' : ''}
+            </button>
+            <button 
+              className="button toggle-button" 
+              onClick={() => setShowHikes(!showHikes)} 
+              title="Show/hide hiking trail markers"
+              style={{ background: showHikes ? '#ef4444' : '#10b981' }}
+            >
+              🥾 Hikes {showHikes ? '✓' : ''}
+            </button>
+            <button 
+              className="button toggle-button" 
+              onClick={() => setShow4WDTracks(!show4WDTracks)} 
+              title="Show/hide 4WD tracks and off-road trails"
+              style={{ background: show4WDTracks ? '#ef4444' : '#10b981' }}
+            >
+              🚙 4WD {show4WDTracks ? '✓' : ''}
+            </button>
+            <button className="button" onClick={updateRoute} disabled={isRouting || itinerary.length === 0}>
+              {isRouting ? 'Routing…' : 'Update Route'}
+            </button>
+            {isRouting && <span className="spinner" aria-hidden="true" />}
+            <button className="button" onClick={exportGPX} disabled={!route} title="Download route as GPX">
+              Export GPX
+            </button>
+            <button className="button" onClick={openInGoogleMaps} disabled={!route} title="Open route in Google Maps">
+              Open in Google Maps
+            </button>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center', flexGrow: 1 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
                 className="startInput"
                 placeholder="Type start place (e.g. Adelaide)"
                 value={startQuery}
@@ -683,64 +729,6 @@ export default function App() {
               )}
             </div>
           </div>
-
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <button 
-              className="button small" 
-              onClick={() => setShowSmallTownsOnly(!showSmallTownsOnly)} 
-              title="Show only towns with population under 10,000"
-              style={{ background: showSmallTownsOnly ? '#ef4444' : '#10b981' }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span>Show Only Small Towns</span>
-                <span style={{ fontSize: 10, marginTop: 2 }}>{showSmallTownsOnly ? 'Enabled' : 'Disabled'}</span>
-              </div>
-            </button>
-            <button 
-              className="button small" 
-              onClick={() => setShowCampsites(!showCampsites)} 
-              title="Show/hide campsite markers"
-              style={{ background: showCampsites ? '#10b981' : '#ef4444' }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span>Show Campsites</span>
-                <span style={{ fontSize: 10, marginTop: 2 }}>{showCampsites ? 'Enabled' : 'Disabled'}</span>
-              </div>
-            </button>
-            <button 
-              className="button small" 
-              onClick={() => setShowHikes(!showHikes)} 
-              title="Show/hide hiking trail markers"
-              style={{ background: showHikes ? '#ef4444' : '#10b981' }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span>🥾 Show Hikes</span>
-                <span style={{ fontSize: 10, marginTop: 2 }}>{showHikes ? 'Enabled' : 'Disabled'}</span>
-              </div>
-            </button>
-            <button 
-              className="button small" 
-              onClick={() => setShow4WDTracks(!show4WDTracks)} 
-              title="Show/hide 4WD tracks and off-road trails"
-              style={{ background: show4WDTracks ? '#ef4444' : '#10b981' }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span>🚙 Show 4WD Tracks</span>
-                <span style={{ fontSize: 10, marginTop: 2 }}>{show4WDTracks ? 'Enabled' : 'Disabled'}</span>
-              </div>
-            </button>
-            <button className="button" onClick={updateRoute} disabled={isRouting || itinerary.length === 0}>
-              {isRouting ? 'Routing…' : 'Update Route'}
-            </button>
-            {isRouting && <span className="spinner" aria-hidden="true" />}
-            <button className="button" onClick={exportGPX} disabled={!route} title="Download route as GPX">
-              Export GPX
-            </button>
-            <button className="button" onClick={openInGoogleMaps} disabled={!route} title="Open route in Google Maps">
-              Open in Google Maps
-            </button>
-          </div>
-        </div>
       </header>
       <main className="main">
         <div className="mapPane">

@@ -443,6 +443,13 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       return
     }
     
+    // Validate bbox values
+    if (!bbox.south || !bbox.north || !bbox.east || !bbox.west ||
+        isNaN(bbox.south) || isNaN(bbox.north) || isNaN(bbox.east) || isNaN(bbox.west)) {
+      console.log('Invalid bbox for hikes, skipping fetch')
+      return
+    }
+    
     const bboxStr = `(${bbox.south},${bbox.west},${bbox.north},${bbox.east})`
     // Query for hiking trails, walking tracks, and trailheads
     const query = `[out:json][timeout:25];
@@ -543,6 +550,13 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
     // Only fetch 4WD tracks at closer zoom levels
     if (bbox.zoom < 7) {
       setFourWDTracks([])
+      return
+    }
+    
+    // Validate bbox values
+    if (!bbox.south || !bbox.north || !bbox.east || !bbox.west ||
+        isNaN(bbox.south) || isNaN(bbox.north) || isNaN(bbox.east) || isNaN(bbox.west)) {
+      console.log('Invalid bbox for 4WD tracks, skipping fetch')
       return
     }
     

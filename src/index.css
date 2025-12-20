@@ -300,112 +300,6 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   filter: hue-rotate(30deg) saturate(2.8) brightness(0.7) sepia(0.6);
 }
 
-/* Mobile-specific styles */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    gap: 8px;
-    padding: 8px;
-  }
-
-  .header h1 {
-    font-size: 16px !important;
-  }
-
-  .header > div {
-    width: 100%;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .startInput {
-    min-width: 100%;
-    width: 100%;
-    padding: 10px;
-    font-size: 16px; /* Prevents zoom on iOS */
-  }
-
-  .main {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
-  }
-
-  .sidebar {
-    border-left: none;
-    border-top: 2px solid #e2e8f0;
-    max-height: 40vh;
-    min-width: 100%;
-    order: 2;
-  }
-
-  .mapPane {
-    order: 1;
-    height: 60vh;
-  }
-
-  .sidebar h2 {
-    font-size: 14px;
-    padding: 10px;
-  }
-
-  .itineraryList {
-    max-height: 25vh;
-  }
-
-  .itineraryItem {
-    padding: 12px;
-    font-size: 14px;
-  }
-
-  .button {
-    padding: 10px 14px;
-    font-size: 14px;
-    min-height: 44px; /* iOS touch target */
-    white-space: nowrap;
-  }
-
-  .button.small {
-    padding: 8px 12px;
-    font-size: 13px;
-    min-height: 40px;
-  }
-
-  .geocodePickOverlay {
-    width: calc(100vw - 16px);
-    max-width: 420px;
-    left: 8px;
-    right: 8px;
-  }
-
-  /* Make sidebar buttons wrap and stack better on mobile */
-  .sidebar > div {
-    flex-wrap: wrap;
-    gap: 6px !important;
-  }
-
-  .sidebar > div button {
-    flex: 1 1 auto;
-    min-width: calc(50% - 3px);
-  }
-
-  /* Larger tap targets for map popups */
-  .leaflet-popup-content {
-    font-size: 14px;
-    min-width: 200px !important;
-  }
-
-  .leaflet-popup-content .button {
-    width: 100%;
-    margin-left: 0 !important;
-    margin-top: 8px;
-  }
-
-  /* Stack buttons in popups */
-  .leaflet-popup-content > div > button:last-of-type {
-    margin-top: 8px;
-  }
-}
-
 /* Better PC experience - slightly wider sidebar */
 @media (min-width: 1400px) {
   .main {
@@ -612,68 +506,6 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   margin: 0;
 }
 
-/* Mobile Responsive Design */
-@media (max-width: 768px) {
-  .main {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
-  }
-
-  .sidebar {
-    min-width: unset;
-    width: 100%;
-    max-height: 40%;
-    border-left: none;
-    border-top: 1px solid #e2e8f0;
-  }
-
-  .sidebarHeader {
-    padding: 10px 12px;
-  }
-
-  .sidebarHeader h2 {
-    font-size: 14px;
-    margin: 0 0 6px 0;
-  }
-
-  .header {
-    padding: 8px 12px;
-  }
-
-  .header h1 {
-    font-size: 18px;
-  }
-
-  .button {
-    font-size: 10px;
-    padding: 3px 6px;
-    margin-right: 3px;
-    margin-bottom: 2px;
-  }
-
-  .itineraryItem {
-    padding: 8px 10px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .itineraryItem > div:first-child {
-    width: 100%;
-  }
-
-  .itineraryItem > div:last-child {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .itineraryList {
-    max-height: 200px;
-  }
-}
-
 /* Extra small devices (phones in portrait) */
 @media (max-width: 480px) {
   .main {
@@ -782,4 +614,198 @@ body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarel
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
   z-index: 1100;
   pointer-events: none;
+}
+
+/* Tablet & Mobile Responsive Design */
+@media (max-width: 1024px) {
+  .main {
+    grid-template-columns: 1fr 300px;
+  }
+  .sidebar {
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app {
+    height: auto !important;
+    min-height: 100vh;
+  }
+
+  .main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 65vh auto;
+    height: auto !important;
+    overflow-y: auto;
+  }
+
+  .mapPane {
+    height: 65vh !important;
+    width: 92% !important;
+    position: relative;
+  }
+
+  .sidebar {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    min-width: auto;
+    max-height: none;
+    height: auto;
+    border-left: none;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 16px 16px 0 0;
+    z-index: 100;
+    display: flex;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+    background: #fff;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    align-items: stretch;
+  }
+  
+  /* First header div: make flex-wrap for proper mobile flow */
+  .header > div:first-child {
+    flex-wrap: wrap !important;
+  }
+  
+  /* Button container - grid with 4 columns for first row */
+  .header .button-container {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
+
+  .sidebarHeader {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sidebarHeader h2 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .sidebarContent {
+    max-height: calc(50vh - 70px);
+  }
+
+  .button {
+    font-size: 9px;
+    padding: 5px 8px;
+    min-height: 32px;
+    white-space: nowrap;
+  }
+
+  .button.toggle-button {
+    font-size: 9px;
+    padding: 5px 8px;
+    min-height: 32px;
+  }
+  
+  /* Flatten toggle button layout on mobile - override inline styles */
+  .button.toggle-button > div {
+    flex-direction: row !important;
+    gap: 0 !important;
+  }
+  
+  /* Hide the Enabled/Disabled status text on mobile */
+  .button.toggle-button > div > span:last-child {
+    display: none !important;
+  }
+
+  .button:active {
+    transform: scale(0.95);
+  }
+
+  .button:hover {
+    transform: none;
+  }
+
+  .itineraryItem {
+    padding: 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    align-items: stretch;
+  }
+
+  h1 {
+    font-size: 16px !important;
+    margin: 0 !important;
+  }
+
+  .button {
+    font-size: 9px;
+    padding: 3px 5px;
+  }
+
+  .button-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .startInput {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .sidebar {
+    max-height: 55vh;
+  }
+
+  .sidebarContent {
+    max-height: calc(55vh - 80px);
+  }
+
+  .modal {
+    width: 95% !important;
+    max-height: 80vh !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 6px;
+  }
+
+  h1 {
+    font-size: 14px !important;
+  }
+
+  .button {
+    font-size: 8px;
+    padding: 2px 4px;
+  }
+
+  .button-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    max-height: 60vh;
+  }
+
+  .itineraryItem {
+    padding: 6px;
+    font-size: 11px;
+  }
 }
