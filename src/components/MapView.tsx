@@ -296,7 +296,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
 
     const query = `[out:json][timeout:25];(
       ${qParts.join('\n      ')}
-    );out center;`
+    );out center geom;`
 
     console.log('Fetching places with query:', query)
 
@@ -333,7 +333,9 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
       if (!data) throw lastErr || new Error('Overpass: no response from endpoints')
 
       const pts: Place[] = []
+      const MAX_PLACES = 300 // Limit results to prevent rendering issues
       for (const el of data.elements) {
+        if (pts.length >= MAX_PLACES) break // Stop processing once limit reached
         const tags = el.tags || {}
         const name = tags.name || tags['name:en'] || null
         if (!name) continue
@@ -353,7 +355,7 @@ export default function MapView({ onAddPlace, selectedIds, route, startLocation,
         
         pts.push({ id: `${el.type}/${el.id}`, name, type, lat, lon, population })
       }
-      console.log(`Fetched ${pts.length} places:`, pts.slice(0, 10))
+      console.log(`Fetched ${pts.length} places (max ${MAX_PLACES}):`, pts.slice(0, 10))
       setPlaces(pts)
     } catch (e) {
       if ((e as any).name === 'AbortError') return
