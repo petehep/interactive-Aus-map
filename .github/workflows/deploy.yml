@@ -27,26 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc wkhtmltopdf
-
-      - name: Generate PDF User Manual (v6.0)
-        run: |
-          sed "s/{{DATE}}/$(date -u '+%Y-%m-%d %H:%M UTC')/" docs/pdf-cover.md > docs/pdf-cover.tmp.md
-          pandoc docs/pdf-cover.tmp.md USER_MANUAL.md \
-            -o public/USER_MANUAL_v6.0.pdf \
-            --from markdown \
-            --toc \
-            -V geometry:margin=1in \
-            -V title:"Aus Trip Scheduler — User Manual v6.0" \
-            -V author:"petehep" \
-            -V date:"$(date -u '+%Y-%m-%d %H:%M UTC')" \
-            -V pagestyle:plain \
-            -V header-left:"Aus Trip Scheduler — User Manual v6.0" \
-            -V footer-right:"Page \\thepage" \
-            --pdf-engine=wkhtmltopdf
-          rm -f docs/pdf-cover.tmp.md
-        
       - name: Build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
